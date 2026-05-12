@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CX · Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  /* Cocos brand palette */
+  --blue: #0062DE;--blue-dark: #002C65;--blue-darker: #001533;
+  --blue-light: #D7ECFE;--blue-mid: #0050B8;
+  --celeste: #0062DE;--celeste-light: #D7ECFE;
+  --text: #001533;--text-muted: #4A6080;--text-dim: #8AAEC8;
+  --bg: #F0F6FF;--surface: #fff;
+  --border: #C8DEFA;--border-strong: #7EB3F5;
+  --success: #007A5A;--success-bg: #D6F5EC;
+  --danger: #C0392B;--danger-bg: #FDEDEC;
+  --warning-bg: #EAF4FF;--warning-text: #002C65;
+  --radius: 14px;--radius-sm: 8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.page{display:none;min-height:100vh}.page.active{display:block}
+#page-admin.active,#page-agente.active{display:flex;flex-direction:row}
+
+/* SIDEBAR */
+.sidebar{width:200px;min-height:100vh;background:var(--blue-darker);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;box-shadow:2px 0 16px rgba(0,21,51,.18)}
+.sidebar-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-brand-name{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.01em;line-height:1.2}
+.sidebar-brand-dot{color:#0062DE}
+.sidebar-brand-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:4px;font-weight:600;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-nav{flex:1;padding:1rem 0}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 1.25rem;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .15s;border-left:3px solid transparent;font-family:'Plus Jakarta Sans',sans-serif}
+.sidebar-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sidebar-item.active{color:#fff;background:rgba(0,98,222,.25);border-left-color:#0062DE}
+.sidebar-item svg{flex-shrink:0;opacity:.7}
+.sidebar-item.active svg{opacity:1}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-user{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn-logout{width:100%;padding:7px 12px;font-size:12px;font-weight:600;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.2);background:none;color:rgba(255,255,255,.7);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;text-align:center}
+.btn-logout:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.4)}
+
+/* CONTENT AREA */
+.page-content{margin-left:200px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.main{padding:2rem;max-width:860px;width:100%}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+button{cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;font-weight:500}
+.btn{padding:8px 18px;font-size:14px;font-weight:600;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);color:var(--text)}
+.btn:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue-mid);border-color:var(--blue-mid);color:#fff}
+.btn-sm{padding:5px 13px;font-size:13px}
+.btn-ghost{background:none;border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.8)}
+.btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.4)}
+.btn-danger{background:none;border-color:rgba(192,57,43,.3);color:var(--danger)}
+.btn-danger:hover{background:var(--danger-bg)}
+.btn-link{background:none;border:none;color:var(--blue);font-size:13px;padding:0;font-weight:600;text-decoration:underline}
+.btn-link:hover{color:var(--blue-dark)}
+
+input[type=text],input[type=password],textarea,select{width:100%;padding:9px 13px;font-size:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:400}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,98,222,.12)}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px;font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,44,101,.04)}
+.card-accent{border-top:3px solid var(--blue)}
+.main{padding:2rem;max-width:840px;margin:0 auto}
+.tabs{display:none}
+.tab{display:none}
+/* Sub-tabs dentro de panels siguen visibles */
+#res-subtabs .tab{display:inline-block;padding:10px 18px;font-size:14px;font-weight:600;color:var(--text-muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-2px;transition:color .15s}
+#res-subtabs .tab:hover{color:var(--blue)}
+#res-subtabs .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+#res-subtabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:1.25rem}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.01em}
+.tag-admin{background:#D7ECFE;color:#002C65;border:1px solid #7EB3F5}
+.tag-agente{background:#EAF4FF;color:#0050B8;border:1px solid #A8CCEE}
+.tag-success{background:var(--success-bg);color:var(--success)}
+.tag-danger{background:var(--danger-bg);color:var(--danger)}
+.tag-muted{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
+.tag-multiple{background:#EDE9FF;color:#4A2F9E;border:1px solid #C4B5F7}
+.tag-tf{background:#D6F5EC;color:#007A5A;border:1px solid #A0DDB8}
+.tag-escrita{background:#FFF3E0;color:#8B4513;border:1px solid #F5C98A}
+.tag-modulo{background:#F3E8FF;color:#6B21A8;border:1px solid #D8B4FE}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.5rem}
+.stat-card{background:var(--blue-darker);border:none;border-radius:var(--radius-sm);padding:1.1rem;text-align:center}
+.stat-val{font-size:26px;font-weight:700;color:#fff}
+.stat-lbl{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;font-weight:500}
+
+.prog-wrap{height:5px;background:var(--border);border-radius:3px;margin-bottom:1.5rem;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s ease}
+.opt-btn{width:100%;text-align:left;padding:12px 16px;margin-bottom:8px;font-size:14px;font-weight:500;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--text);display:flex;align-items:center;gap:12px;transition:all .15s}
+.opt-btn:hover{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.opt-btn.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600}
+.opt-btn.correct{border-color:#007A5A;background:var(--success-bg);color:var(--success)}
+.opt-btn.wrong{border-color:#E74C3C;background:var(--danger-bg);color:var(--danger)}
+.opt-letter{width:28px;height:28px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.hint-box{background:var(--warning-bg);border:1.5px solid #A8CCEE;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--warning-text);margin-top:10px;line-height:1.5}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
+.hist-row:last-child{border-bottom:none}
+.resource-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.user-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
+.user-row:last-child{border-bottom:none}
+.empty{text-align:center;padding:3rem 0;color:var(--text-muted);font-size:14px;font-weight:500}
+.section-title{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .3s ease}
+.big-score{font-size:52px;font-weight:700;color:var(--blue);text-align:center;line-height:1}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--blue-darker)}
+.login-box{background:var(--surface);border:none;border-radius:var(--radius);width:100%;max-width:390px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-top{background:var(--blue-darker);padding:2rem 1.75rem 1.75rem;position:relative;overflow:hidden}
+.login-top::before{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;background:rgba(0,98,222,.25);border-radius:50%}
+.login-top::after{content:'';position:absolute;right:20px;bottom:-40px;width:80px;height:80px;background:rgba(0,98,222,.15);border-radius:50%}
+.login-logo{font-size:1.5rem;font-weight:700;color:#fff;letter-spacing:-.01em;position:relative;z-index:1}
+.login-logo span{color:#0062DE}
+.login-title{font-size:1rem;font-weight:600;color:#fff;margin-top:12px;position:relative;z-index:1}
+.login-sub{font-size:13px;color:rgba(255,255,255,.6);position:relative;z-index:1}
+.login-body{padding:1.75rem}
+.login-body label{text-transform:uppercase;letter-spacing:.06em}
+
+.active-banner{background:var(--blue-light);border:1.5px solid var(--border-strong);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.q-block{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,44,101,.04)}
+.q-block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.written-input{width:100%;padding:10px 13px;font-size:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:80px;resize:vertical}
+.written-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,98,222,.12)}
+.written-input.correct-written{border-color:#007A5A;background:var(--success-bg)}
+.written-input.wrong-written{border-color:#E74C3C;background:var(--danger-bg)}
+.score-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
+.score-bar-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .5s ease}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--blue-darker);display:flex;align-items:center;justify-content:center;z-index:100;font-size:15px;color:rgba(255,255,255,.8);font-weight:600;flex-direction:column;gap:16px}
+.loading-overlay .spinner{width:22px;height:22px;border-width:3px}
+
+/* DETAIL PANEL */
+.detail-panel{display:none;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,44,101,.06)}
+.detail-panel.active{display:block}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.detail-q{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:10px}
+.detail-q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.answer-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:13px}
+.answer-label{font-size:11px;font-weight:600;color:var(--text-muted);min-width:80px;padding-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.answer-val{font-size:13px;color:var(--text);flex:1;line-height:1.5}
+.answer-val.ok{color:var(--success);font-weight:600}
+.answer-val.bad{color:var(--danger);font-weight:600}
+
+@media(max-width:600px){.sidebar{width:60px}.sidebar-brand-name,.sidebar-brand-sub,.sidebar-item span,.sidebar-user{display:none}.sidebar-item{justify-content:center;padding:12px}.page-content{margin-left:60px}.main{padding:1.25rem}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay" class="loading-overlay"><span class="spinner"></span> Cargando portal...</div>
+
+<!-- LOGIN -->
+<div id="page-login" class="page">
+  <div class="login-wrap">
+    <div class="login-box fade-in">
+      <div class="login-top">
+        <div class="login-logo">CX <span>· Challenge</span></div>
+      </div>
+      <div class="login-body">
+        <div style="margin-bottom:12px"><label>Usuario</label><input type="text" id="login-user" placeholder="tu.nombre" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+        <div style="margin-bottom:16px"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+        <button class="btn btn-primary" style="width:100%;padding:10px" id="login-btn" onclick="doLogin()">Ingresar</button>
+        <div id="login-err" style="display:none;font-size:13px;color:var(--danger);margin-top:10px;text-align:center"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">CX <span class="sidebar-brand-dot">·</span> Challenge</div>
+      <div class="sidebar-brand-sub" id="admin-sidebar-sub">Admin</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" id="sadmin-quiz" onclick="adminTab('quiz')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Crear quiz
+      </button>
+      <button class="sidebar-item" id="sadmin-resultados" onclick="adminTab('resultados')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Resultados
+      </button>
+      <button class="sidebar-item" id="sadmin-evaluaciones" onclick="adminTab('evaluaciones')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Evaluaciones
+      </button>
+      <button class="sidebar-item" id="sadmin-archivo" onclick="adminTab('archivo')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+        Archivo
+      </button>
+      <button class="sidebar-item" id="sadmin-recursos" onclick="adminTab('recursos')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+        Recursos
+      </button>
+      <button class="sidebar-item" id="sadmin-usuarios" onclick="adminTab('usuarios')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Usuarios
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="nav-username"></div>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </aside>
+  <div class="page-content">
+  <div class="main">
+
+    <!-- QUIZ -->
+    <div id="admin-quiz" class="tab-panel active">
+      <div id="active-quiz-info" style="margin-bottom:1.25rem">
+        <div id="admin-quiz-lista"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Información del quiz</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Completá los datos y cargá las preguntas.</div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div><label>Nombre de la semana</label><input type="text" id="week-name" placeholder="Ej: Semana 15 — Abril 2025" /></div>
+          <div><label>Equipo destinatario</label><input type="text" id="week-team" placeholder="Ej: Equipo CX completo" /></div>
+        </div>
+        <div><label>Contexto o descripción (opcional)</label><textarea id="week-desc" style="min-height:60px" placeholder="Ej: Esta semana trabajamos sobre AstroPay..."></textarea></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:500">Preguntas <span style="font-size:12px;color:var(--text-muted)" id="q-counter">(0 cargadas)</span></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="addQuestion('multiple')">+ Múltiple</button>
+          <button class="btn btn-sm" onclick="addQuestion('tf')">+ V/F</button>
+          <button class="btn btn-sm" onclick="addQuestion('escrita')">+ Escrita</button>
+        </div>
+      </div>
+      <div id="q-list"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+        <button class="btn" onclick="clearQuestions()">Limpiar</button>
+        <button class="btn btn-primary" onclick="activateQuiz()">Activar quiz</button>
+      </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div id="admin-resultados" class="tab-panel">
+      <div id="res-empty" class="empty">Todavía no hay resultados registrados.</div>
+      <div id="res-content" style="display:none">
+        <div class="stat-grid" id="admin-stats"></div>
+
+        <!-- SUB-TABS RESULTADOS -->
+        <div style="display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1.25rem" id="res-subtabs">
+          <button class="tab active" id="res-tab-general" onclick="resTab('general')">General</button>
+          <button class="tab" id="res-tab-agente" onclick="resTab('agente')">Por agente</button>
+          <button class="tab" id="res-tab-mes" onclick="resTab('mes')">Por mes</button>
+          <button class="tab" id="res-tab-tablero" onclick="resTab('tablero')">Tablero</button>
+        </div>
+
+        <!-- PANEL DETALLE -->
+        <div id="detail-panel" class="detail-panel">
+          <div class="detail-header">
+            <div>
+              <div style="font-size:15px;font-weight:500" id="detail-name"></div>
+              <div style="font-size:13px;color:var(--text-muted);margin-top:2px" id="detail-meta"></div>
+            </div>
+            <button class="btn btn-sm" onclick="closeDetail()">← Volver</button>
+          </div>
+          <div id="detail-questions"></div>
+        </div>
+
+        <div id="hist-wrap">
+          <!-- VISTA GENERAL -->
+          <div id="res-view-general">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div class="section-title" style="margin:0">Ranking del equipo</div>
+              <select id="ranking-filter" style="width:auto;font-size:13px;padding:5px 10px" onchange="filterRanking()">
+                <option value="all">Todos los meses</option>
+              </select>
+            </div>
+            <div class="card" style="padding:0 1.5rem;margin-bottom:1.5rem"><div id="admin-ranking"></div></div>
+            <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+              <div class="section-title" style="margin:0">Historial — hacé click para ver el detalle</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-sm" onclick="downloadExcel()">Descargar Excel</button>
+                <button class="btn btn-sm btn-danger" onclick="clearResults()">Limpiar</button>
+              </div>
+            </div>
+            <div class="card" style="padding:0 1.5rem"><div id="admin-hist"></div></div>
+          </div>
+          <!-- VISTA POR AGENTE -->
+          <div id="res-view-agente" style="display:none">
+            <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+              <label style="margin:0;white-space:nowrap">Agente:</label>
+              <select id="filter-agente-sel" style="width:auto;font-size:13px;padding:5px 10px" onchange="renderViewAgente()"><option value="">Seleccioná un agente</option></select>
+            </div>
+            <div id="view-agente-content"></div>
+          </div>
+          <!-- VISTA POR MES -->
+          <div id="res-view-mes" style="display:none">
+            <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+              <label style="margin:0;white-space:nowrap">Mes:</label>
+              <select id="filter-mes-sel" style="width:auto;font-size:13px;padding:5px 10px" onchange="renderViewMes()"><option value="">Seleccioná un mes</option></select>
+            </div>
+            <div id="view-mes-content"></div>
+          </div>
+
+          <!-- VISTA TABLERO -->
+          <div id="res-view-tablero" style="display:none">
+            <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <label style="margin:0;white-space:nowrap">Mes:</label>
+              <select id="tablero-mes-sel" style="width:auto;font-size:13px;padding:5px 10px" onchange="renderTablero()">
+                <option value="all">Todos los meses</option>
+              </select>
+            </div>
+            <div id="tablero-content" style="overflow-x:auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECURSOS -->
+    <div id="admin-recursos" class="tab-panel">
+      <div class="card">
+        <div class="section-title">Agregar recurso</div>
+        <div style="margin-bottom:10px"><label>Título</label><input type="text" id="res-title" placeholder="Ej: Proceso validación Complif" /></div>
+        <div style="margin-bottom:10px"><label>Link o descripción</label><input type="text" id="res-link" placeholder="https://... o descripción breve" /></div>
+        <div style="margin-bottom:14px"><label>Categoría</label><select id="res-cat"><option value="Proceso">Proceso</option><option value="Herramienta">Herramienta</option><option value="Política">Política</option><option value="Otro">Otro</option></select></div>
+        <button class="btn btn-primary btn-sm" onclick="addResource()">Agregar</button>
+      </div>
+      <div class="section-title">Recursos disponibles</div>
+      <div id="resources-list-admin"></div>
+    </div>
+
+    <!-- ARCHIVO ADMIN -->
+    <div id="admin-archivo" class="tab-panel">
+      <div class="section-title">Quizzes vencidos</div>
+      <div id="archivo-quiz-lista"><div class="empty">No hay quizzes archivados todavía.</div></div>
+    </div>
+
+    <!-- EVALUACIONES ADMIN -->
+    <div id="admin-evaluaciones" class="tab-panel">
+      <!-- Creador -->
+      <div class="card">
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Nueva evaluación</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Creá una evaluación para una capacitación específica.</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div><label>Nombre de la capacitación</label><input type="text" id="eval-nombre" placeholder="Ej: Capacitación Tarjetas Q2" /></div>
+          <div><label>Puntaje mínimo aprobatorio (%)</label><input type="text" id="eval-minimo" placeholder="Ej: 60" style="width:100%" /></div>
+        </div>
+        <div style="margin-bottom:14px"><label>Descripción (opcional)</label><textarea id="eval-desc" style="min-height:50px" placeholder="Contexto o instrucciones para el agente..."></textarea></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;margin-top:6px">
+          <div style="font-size:14px;font-weight:500">Preguntas <span style="font-size:12px;color:var(--text-muted)" id="eval-q-counter">(0 cargadas)</span></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="addEvalQuestion('multiple')">+ Múltiple</button>
+            <button class="btn btn-sm" onclick="addEvalQuestion('tf')">+ V/F</button>
+            <button class="btn btn-sm" onclick="addEvalQuestion('escrita')">+ Escrita</button>
+          </div>
+        </div>
+        <div id="eval-q-list"></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+          <button class="btn" onclick="clearEvalQuestions()">Limpiar</button>
+          <button class="btn btn-primary" onclick="crearEvaluacion()">Crear y activar</button>
+        </div>
+      </div>
+
+      <!-- Lista de evaluaciones activas -->
+      <div class="section-title">Evaluaciones activas</div>
+      <div id="admin-eval-lista"><div class="empty">No hay evaluaciones creadas.</div></div>
+
+      <!-- Resultados de evaluaciones -->
+      <div class="section-title" style="margin-top:1.5rem">Resultados pendientes de revisión</div>
+      <div id="admin-eval-resultados"><div class="empty">No hay resultados pendientes.</div></div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div id="admin-usuarios" class="tab-panel">
+      <div class="section-title">Usuarios registrados</div>
+      <div class="card" style="padding:0 1.5rem"><div id="users-list"></div></div>
+      <div class="card" style="margin-top:14px">
+        <div class="section-title">Agregar usuario</div>
+        <div class="grid2" style="margin-bottom:10px">
+          <div><label>Usuario</label><input type="text" id="new-user" placeholder="nombre.apellido" /></div>
+          <div><label>Contraseña</label><input type="text" id="new-pass" placeholder="clave123" /></div>
+          <div><label>Nombre completo</label><input type="text" id="new-name" placeholder="María González" /></div>
+          <div><label>Email corporativo</label><input type="text" id="new-email" placeholder="maria@cocos.com.ar" /></div>
+        </div>
+        <div style="margin-bottom:14px"><label>Rol</label><select id="new-role"><option value="agente">Agente</option><option value="admin">Admin</option></select></div>
+        <button class="btn btn-primary btn-sm" onclick="addUser()">Agregar usuario</button>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- AGENTE -->
+<div id="page-agente" class="page">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">CX <span class="sidebar-brand-dot">·</span> Challenge</div>
+      <div class="sidebar-brand-sub" id="agente-sidebar-sub">Agente</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" id="sagente-quiz" onclick="agenteTab('quiz')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Quiz
+      </button>
+      <button class="sidebar-item" id="sagente-mis-resultados" onclick="agenteTab('mis-resultados')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Mis resultados
+      </button>
+      <button class="sidebar-item" id="sagente-evaluaciones" onclick="agenteTab('evaluaciones')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Evaluaciones
+      </button>
+      <button class="sidebar-item" id="sagente-recursos" onclick="agenteTab('recursos')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+        Recursos
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="agente-username"></div>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </aside>
+  <div class="page-content">
+  <div class="main">
+    <div id="agente-quiz" class="tab-panel active">
+      <div id="agente-no-quiz" style="display:none" class="empty">No hay un quiz activo por ahora. Volvé más tarde.</div>
+      <div id="agente-start" style="display:none">
+        <div class="card card-accent fade-in" style="text-align:center;padding:2rem">
+          <div style="font-size:17px;font-weight:600;margin-bottom:6px" id="agente-quiz-title"></div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px" id="agente-quiz-team"></div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.5rem" id="agente-quiz-sub"></div>
+          <button class="btn btn-primary" style="padding:10px 28px" onclick="startQuiz()">Empezar quiz</button>
+        </div>
+      </div>
+      <div id="agente-play" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:13px;color:var(--text-muted)" id="play-counter">0 de 0 respondidas</span>
+        </div>
+        <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div id="play-wrap"></div>
+        <div style="text-align:right;margin-top:1rem"><button class="btn btn-primary" onclick="submitQuiz()">Enviar respuestas</button></div>
+      </div>
+      <div id="agente-done" style="display:none" class="fade-in">
+        <div class="card card-accent" style="padding:2rem;text-align:center">
+          <div class="big-score" id="done-score"></div>
+          <div style="font-size:14px;color:var(--text-muted);margin-top:8px" id="done-detail"></div>
+          <div style="margin-top:16px;max-width:300px;margin-left:auto;margin-right:auto">
+            <div class="score-bar"><div class="score-bar-fill" id="done-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div id="done-review"></div>
+        <div style="text-align:center;margin-top:1.5rem"><button class="btn" onclick="resetQuiz()">Volver al inicio</button></div>
+      </div>
+    </div>
+    <div id="agente-mis-resultados" class="tab-panel">
+      <div id="my-res-empty" class="empty">Todavía no tomaste ningún quiz.</div>
+      <div id="my-res-content" style="display:none">
+        <div class="stat-grid" id="my-stats"></div>
+        <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center">
+          <label style="margin:0;white-space:nowrap">Mes:</label>
+          <select id="my-mes-filter" style="width:auto;font-size:13px;padding:5px 10px" onchange="renderMyResultsByMonth()">
+            <option value="all">Todos los meses</option>
+          </select>
+        </div>
+        <div class="section-title">Historial</div>
+        <div class="card" style="padding:0 1.5rem"><div id="my-hist"></div></div>
+      </div>
+    </div>
+    <div id="agente-evaluaciones" class="tab-panel">
+      <div id="agente-eval-lista"><div class="empty">No hay evaluaciones activas por ahora.</div></div>
+      <!-- Panel de evaluación en curso -->
+      <div id="agente-eval-play" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <div style="font-weight:600;font-size:15px" id="eval-play-titulo"></div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px" id="eval-play-sub"></div>
+          </div>
+          <button class="btn btn-sm btn-ghost" onclick="cerrarEvalPlay()">← Volver</button>
+        </div>
+        <div class="prog-wrap"><div class="prog-fill" id="eval-prog-fill" style="width:0%"></div></div>
+        <div id="eval-play-wrap"></div>
+        <div style="text-align:right;margin-top:1rem"><button class="btn btn-primary" onclick="submitEval()">Enviar evaluación</button></div>
+      </div>
+      <!-- Resultado de evaluación -->
+      <div id="agente-eval-done" style="display:none" class="fade-in">
+        <div class="card card-accent" style="padding:2rem;text-align:center">
+          <div class="big-score" id="eval-done-score"></div>
+          <div style="font-size:14px;color:var(--text-muted);margin-top:8px" id="eval-done-detail"></div>
+          <div id="eval-done-status" style="margin-top:12px"></div>
+          <div style="margin-top:16px;max-width:300px;margin-left:auto;margin-right:auto">
+            <div class="score-bar"><div class="score-bar-fill" id="eval-done-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div id="eval-done-review"></div>
+        <div style="text-align:center;margin-top:1.5rem"><button class="btn" onclick="volverEvalLista()">Volver a evaluaciones</button></div>
+      </div>
+    </div>
+    <div id="agente-recursos" class="tab-panel">
+      <div id="agente-resources-list"></div>
+      <div id="agente-res-empty" class="empty" style="display:none">No hay recursos disponibles todavía.</div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://pspukxfphvrxdfuyjhpj.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcHVreGZwaHZyeGRmdXlqaHBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODI5NTQsImV4cCI6MjA5MTI1ODk1NH0.1egA7BFul9NdSo1pFk6GlRC-Ruj8C-g-9uqM1PjFOIg';
+
+async function sb(table,method='GET',body=null,query=''){
+  const res=await fetch(`${SUPA_URL}/rest/v1/${table}${query}`,{
+    method,
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''},
+    body:body?JSON.stringify(body):null
+  });
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  const text=await res.text();
+  return text?JSON.parse(text):[];
+}
+
+let currentUser=null,currentQuiz=null,playerAnswers={},editQuestions=[];
+
+async function init(){
+  document.getElementById('loading-overlay').style.display='flex';
+  try{
+    const users=await sb('cx_users','GET',null,'?select=*');
+    if(!users.length){
+      await sb('cx_users','POST',{user_id:'admin',pass:'admin123',role:'admin',name:'Administrador'});
+      await sb('cx_users','POST',{user_id:'agente1',pass:'agente123',role:'agente',name:'Agente 1'});
+    }
+  }catch(e){console.error(e);}
+  document.getElementById('loading-overlay').style.display='none';
+  show('page-login');
+}
+
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+async function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-err');
+  const btn=document.getElementById('login-btn');
+  if(!u||!p){err.style.display='block';err.textContent='Completá usuario y contraseña.';return;}
+  btn.innerHTML='<span class="spinner"></span> Ingresando...';btn.disabled=true;
+  try{
+    const users=await sb('cx_users','GET',null,`?user_id=eq.${u}&pass=eq.${p}`);
+    if(!users.length){err.style.display='block';err.textContent='Usuario o contraseña incorrectos.';return;}
+    err.style.display='none';currentUser=users[0];
+    const quizzes=await sb('cx_quiz','GET',null,'?select=*&order=id.desc&limit=1');
+    currentQuiz=quizzes.length?quizzes[0].data:null;
+    if(currentUser.role==='agente'){
+      document.getElementById('agente-username').textContent=currentUser.name;
+      document.getElementById('agente-sidebar-sub').textContent=currentUser.name;
+      show('page-agente');initAgenteQuiz();renderMyResults();renderAgenteResources();
+    }else{
+      document.getElementById('nav-username').textContent=currentUser.name;
+      document.getElementById('admin-sidebar-sub').textContent=currentUser.name;
+      show('page-admin');renderActiveQuizInfo();renderAdminResults();renderAdminResources();renderUsers();
+      editQuestions=[];renderQList();
+    }
+  }catch(e){err.style.display='block';err.textContent='Error de conexión. Intentá de nuevo.';}
+  finally{btn.innerHTML='Ingresar';btn.disabled=false;}
+}
+
+function doLogout(){currentUser=null;currentQuiz=null;playerAnswers={};document.getElementById('login-user').value='';document.getElementById('login-pass').value='';show('page-login')}
+
+function adminTab(t){
+  ['quiz','resultados','evaluaciones','archivo','recursos','usuarios'].forEach(x=>{
+    const el=document.getElementById('sadmin-'+x);
+    if(el) el.classList.toggle('active',x===t);
+  });
+  document.querySelectorAll('#page-admin .tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('admin-'+t).classList.add('active');
+  if(t==='resultados') renderAdminResults();
+  if(t==='recursos') renderAdminResources();
+  if(t==='usuarios') renderUsers();
+  if(t==='evaluaciones'){renderAdminEvalLista();renderAdminEvalResultados();}
+  if(t==='archivo') renderArchivoQuizzes();
+}
+
+function agenteTab(t){
+  ['quiz','mis-resultados','evaluaciones','recursos'].forEach(x=>{
+    const el=document.getElementById('sagente-'+x);
+    if(el) el.classList.toggle('active',x===t);
+  });
+  document.querySelectorAll('#page-agente .tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('agente-'+t).classList.add('active');
+  if(t==='mis-resultados') renderMyResults();
+  if(t==='recursos') renderAgenteResources();
+  if(t==='evaluaciones') renderAgenteEvalLista();
+}
+
+// ---- EDITOR ----
+function addQuestion(type){
+  const q={type,text:'',correct:'',hint:''};
+  if(type==='multiple') q.options=['','','',''];
+  if(type==='tf') q.options=['Verdadero','Falso'];
+  editQuestions.push(q);renderQList();
+}
+function removeQuestion(i){editQuestions.splice(i,1);renderQList();}
+function clearQuestions(){if(confirm('¿Limpiar todas las preguntas?')){editQuestions=[];renderQList();}}
+
+function renderQList(){
+  const list=document.getElementById('q-list');list.innerHTML='';
+  const letters=['A','B','C','D'];
+  const typeLabels={multiple:'Opción múltiple',tf:'Verdadero / Falso',escrita:'Respuesta escrita'};
+  const typeColors={multiple:'tag-multiple',tf:'tag-tf',escrita:'tag-escrita'};
+  editQuestions.forEach((q,i)=>{
+    const block=document.createElement('div');block.className='q-block';
+    let optsHtml='';
+    if(q.type==='multiple'){
+      optsHtml=`<div style="margin-top:10px"><label>Opciones</label>`;
+      q.options.forEach((opt,j)=>{
+        optsHtml+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:600;min-width:16px">${letters[j]}</span>
+          <input type="text" value="${opt}" placeholder="Opción ${letters[j]}" oninput="editQuestions[${i}].options[${j}]=this.value" style="flex:1" />
+          <button class="btn btn-sm ${q.correct===String(j)?'btn-primary':''}" onclick="editQuestions[${i}].correct='${j}';renderQList()" style="white-space:nowrap;font-size:12px">${q.correct===String(j)?'✓ Correcta':'Correcta'}</button>
+        </div>`;
+      });
+      optsHtml+='</div>';
+    }else if(q.type==='tf'){
+      optsHtml=`<div style="margin-top:10px"><label>Respuesta correcta</label><div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm ${q.correct==='Verdadero'?'btn-primary':''}" onclick="editQuestions[${i}].correct='Verdadero';renderQList()">Verdadero</button>
+        <button class="btn btn-sm ${q.correct==='Falso'?'btn-primary':''}" onclick="editQuestions[${i}].correct='Falso';renderQList()">Falso</button>
+      </div></div>`;
+    }else{
+      optsHtml=`<div style="margin-top:10px"><label>Palabras clave de la respuesta correcta (separadas por coma)</label>
+        <input type="text" value="${q.correct}" placeholder="Ej: USD 2000, BIND PSP, ID COELSA" oninput="editQuestions[${i}].correct=this.value" /></div>`;
+    }
+    block.innerHTML=`<div class="q-block-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:500">Pregunta ${i+1}</span>
+          <span class="tag ${typeColors[q.type]}" style="font-size:11px">${typeLabels[q.type]}</span>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="removeQuestion(${i})">Eliminar</button>
+      </div>
+      <label>Enunciado</label>
+      <textarea style="min-height:60px" placeholder="Escribí la pregunta..." oninput="editQuestions[${i}].text=this.value">${q.text}</textarea>
+      ${optsHtml}
+      <div style="margin-top:10px"><label>Explicación cuando se equivoca (opcional)</label>
+        <input type="text" value="${q.hint}" placeholder="Ej: El límite es USD 2.000..." oninput="editQuestions[${i}].hint=this.value" /></div>
+      <div style="margin-top:10px"><label>Módulo del manual</label>
+        <select onchange="editQuestions[${i}].modulo=this.value" style="width:100%">
+          <option value="">Sin módulo</option>
+          ${['Cuenta comitente','Transferencia de dinero','Transferencia de titulos','Operaciones','Loyalty','Crypto','Pay','Tarjeta'].map(m=>`<option value="${m}" ${q.modulo===m?'selected':''}>${m}</option>`).join('')}
+        </select></div>`;
+    list.appendChild(block);
+  });
+  document.getElementById('q-counter').textContent=`(${editQuestions.length} cargadas)`;
+}
+
+async function activateQuiz(){
+  const week=document.getElementById('week-name').value.trim();
+  const team=document.getElementById('week-team').value.trim();
+  const desc=document.getElementById('week-desc').value.trim();
+  if(!week){alert('Escribí el nombre de la semana.');return;}
+  if(!editQuestions.length){alert('Agregá al menos una pregunta.');return;}
+  for(let i=0;i<editQuestions.length;i++){
+    if(!editQuestions[i].text.trim()){alert(`La pregunta ${i+1} no tiene enunciado.`);return;}
+    if(editQuestions[i].type!=='escrita'&&!editQuestions[i].correct){alert(`La pregunta ${i+1} no tiene respuesta correcta.`);return;}
+    if(editQuestions[i].type==='multiple'&&editQuestions[i].options.some(o=>!o.trim())){alert(`La pregunta ${i+1} tiene opciones vacías.`);return;}
+  }
+  try{
+    const quiz={week,team,desc,questions:editQuestions,createdBy:currentUser.name,date:new Date().toLocaleDateString('es-AR')};
+    await sb('cx_quiz','POST',{data:quiz});
+    currentQuiz=quiz;
+    renderActiveQuizInfo();
+    // Notificar agentes por mail
+    try{
+      const users=await sb('cx_users','GET',null,'?role=eq.agente&select=name,email');
+      const agents=users.filter(u=>u.email);
+      if(agents.length){
+        await fetch('/api/notify',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            quizName:week,
+            quizDate:quiz.date,
+            quizQuestions:editQuestions.length,
+            agents
+          })
+        });
+        alert(`Quiz "${week}" activado. Notificación enviada a ${agents.length} agente${agents.length!==1?'s':''}.`);
+      }else{
+        alert(`Quiz "${week}" activado. (Sin agentes con email asignado para notificar)`);
+      }
+    }catch(mailErr){
+      alert(`Quiz "${week}" activado. (No se pudo enviar la notificación por mail)`);
+    }
+    editQuestions=[];renderQList();
+    document.getElementById('week-name').value='';
+    document.getElementById('week-team').value='';
+    document.getElementById('week-desc').value='';
+  }catch(e){alert('Error al guardar el quiz.');}
+}
+
+function quizIsActive(q){
+  // Un quiz está activo si fue creado hace menos de 24hs
+  // La fecha está en formato dd/mm/yyyy — usamos created_at si está disponible
+  if(q._created_at){
+    const diff=(Date.now()-new Date(q._created_at).getTime())/(1000*60*60);
+    return diff<24;
+  }
+  // Fallback: comparar fecha del quiz con hoy
+  const parts=(q.data&&q.data.date)?q.data.date.split('/'):[null,null,null];
+  if(!parts[0]) return false;
+  const quizDate=new Date(`${parts[2]||new Date().getFullYear()}-${String(parts[1]).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`);
+  const diff=(Date.now()-quizDate.getTime())/(1000*60*60);
+  return diff<24;
+}
+
+async function renderActiveQuizInfo(){
+  const lista=document.getElementById('admin-quiz-lista');
+  lista.innerHTML='';
+  try{
+    const quizzes=await sb('cx_quiz','GET',null,'?select=*&order=id.desc');
+    if(!quizzes.length){
+      lista.innerHTML='<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">No hay quizzes activos hoy.</div>';
+      return;
+    }
+    // Guardar created_at para chequear 24hs
+    quizzes.forEach(q=>{q._created_at=q.created_at;});
+    const activos=quizzes.filter(q=>quizIsActive(q));
+    if(!activos.length){
+      lista.innerHTML='<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">No hay quizzes activos hoy. Los anteriores están en <strong>Archivo</strong>.</div>';
+      currentQuiz=quizzes[0].data;
+      return;
+    }
+    activos.forEach((q,idx)=>{
+      const d=q.data;
+      const card=document.createElement('div');
+      card.className='active-banner';
+      card.style.marginBottom='10px';
+      card.innerHTML=`<div>
+          <div style="font-weight:600;font-size:14px">${d.week}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${d.questions.length} preguntas · ${d.createdBy||''} · ${d.date||''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="tag tag-success" style="font-size:11px">Activo hoy</span>
+          ${idx===0?`<button class="btn btn-sm" onclick="enviarRecordatorio(this)" style="white-space:nowrap">⏰ Recordatorio</button>`:''}
+          <button class="btn btn-sm btn-danger" onclick="eliminarQuiz(${q.id})">Eliminar</button>
+        </div>`;
+      lista.appendChild(card);
+    });
+    currentQuiz=quizzes[0].data;
+  }catch(e){}
+}
+
+async function renderArchivoQuizzes(){
+  const lista=document.getElementById('archivo-quiz-lista');
+  lista.innerHTML='<div class="empty">Cargando...</div>';
+  try{
+    const quizzes=await sb('cx_quiz','GET',null,'?select=*&order=id.desc');
+    quizzes.forEach(q=>{q._created_at=q.created_at;});
+    const archivados=quizzes.filter(q=>!quizIsActive(q));
+    if(!archivados.length){lista.innerHTML='<div class="empty">No hay quizzes archivados todavía.</div>';return;}
+    lista.innerHTML='';
+    archivados.forEach(q=>{
+      const d=q.data;
+      const card=document.createElement('div');
+      card.className='card';card.style.marginBottom='10px';
+      card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:600;font-size:14px">${d.week}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${d.questions.length} preguntas · ${d.createdBy||''} · ${d.date||''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag tag-muted" style="font-size:11px">Cerrado</span>
+          <button class="btn btn-sm btn-danger" onclick="eliminarQuiz(${q.id},true)">Eliminar</button>
+        </div>
+      </div>`;
+      lista.appendChild(card);
+    });
+  }catch(e){lista.innerHTML='<div class="empty">Error al cargar el archivo.</div>';}
+}
+
+async function enviarRecordatorio(btn){
+  const orig=btn.innerHTML;
+  btn.innerHTML='<span class="spinner"></span> Enviando...';
+  btn.disabled=true;
+  try{
+    const res=await fetch('/api/reminder',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const data=await res.json();
+    if(data.reminded===0) alert('✅ Todos los agentes ya completaron el quiz.');
+    else alert(`⏰ Recordatorio enviado a ${data.reminded} agente${data.reminded!==1?'s':''} que aún no lo hicieron.`);
+  }catch(e){alert('Error al enviar el recordatorio.');}
+  finally{btn.innerHTML=orig;btn.disabled=false;}
+}
+
+async function eliminarQuiz(id,fromArchivo=false){
+  if(!confirm('¿Eliminar este quiz? Los resultados asociados se mantendrán.')) return;
+  try{
+    await sb('cx_quiz','DELETE',null,`?id=eq.${id}`);
+    const quizzes=await sb('cx_quiz','GET',null,'?select=*&order=id.desc&limit=1');
+    currentQuiz=quizzes.length?quizzes[0].data:null;
+    if(fromArchivo) renderArchivoQuizzes();
+    else renderActiveQuizInfo();
+  }catch(e){alert('Error al eliminar el quiz.');}
+}
+
+// ---- RESULTADOS ADMIN ----
+async function renderAdminResults(){
+  const empty=document.getElementById('res-empty');const content=document.getElementById('res-content');
+  closeDetail();
+  try{
+    const stored=await sb('cx_results','GET',null,'?select=*&order=created_at.desc');
+    if(!stored.length){empty.style.display='block';content.style.display='none';return;}
+    empty.style.display='none';content.style.display='block';
+    const avg=Math.round(stored.reduce((a,b)=>a+b.pct,0)/stored.length);
+    const best=stored.reduce((a,b)=>a.pct>b.pct?a:b);
+    document.getElementById('admin-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-val">${stored.length}</div><div class="stat-lbl">Respuestas totales</div></div>
+      <div class="stat-card"><div class="stat-val">${avg}%</div><div class="stat-lbl">Promedio del equipo</div></div>
+      <div class="stat-card"><div class="stat-val">${best.pct}%</div><div class="stat-lbl">Mejor puntaje</div></div>`;
+    const list=document.getElementById('admin-hist');list.innerHTML='';
+    stored.forEach(e=>{
+      const row=document.createElement('div');row.className='hist-row';
+      row.style.cursor='pointer';
+      row.innerHTML=`<div>
+          <div style="font-weight:500">${e.name}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${e.week} · ${e.date}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span style="font-size:13px;color:var(--text-muted)">${e.correct}/${e.total}</span>
+          <span class="tag ${e.pct>=60?'tag-success':'tag-danger'}">${e.pct}%</span>
+          <span style="font-size:12px;color:var(--blue);font-weight:500">Ver detalle →</span>
+        </div>`;
+      row.onclick=()=>showDetail(e);
+      list.appendChild(row);
+    });
+
+    // RANKING
+    window._allResults = stored;
+    buildRankingFilter(stored);
+    renderRanking(stored);
+  }catch(e){empty.style.display='block';content.style.display='none';}
+}
+
+function showDetail(entry){
+  const panel=document.getElementById('detail-panel');
+  const histWrap=document.getElementById('hist-wrap');
+  document.getElementById('detail-name').textContent=entry.name;
+  document.getElementById('detail-meta').textContent=`${entry.week} · ${entry.date} · ${entry.correct}/${entry.total} correctas (${entry.pct}%)`;
+
+  const qWrap=document.getElementById('detail-questions');
+  qWrap.innerHTML='';
+
+  let details=entry.details;
+  if(typeof details==='string'){try{details=JSON.parse(details);}catch(e){details=null;}}
+  if(!details||!details.length){
+    qWrap.innerHTML='<div style="color:var(--text-muted);font-size:14px">No hay detalle de respuestas disponible para este resultado.</div>';
+    panel.classList.add('active');
+    histWrap.style.display='none';
+    return;
+  }
+  entry.details=details;
+
+  const quiz=currentQuiz;
+  const letters=['A','B','C','D'];
+  const typeLabels={multiple:'Múltiple',tf:'V/F',escrita:'Escrita'};
+  const typeColors={multiple:'tag-multiple',tf:'tag-tf',escrita:'tag-escrita'};
+
+  entry.details.forEach((d,i)=>{
+    const q=quiz&&quiz.questions[i];
+    const block=document.createElement('div');
+    block.className='detail-q';
+    let answerHtml='';
+    if(q){
+      let respuesta='';
+      let correcta='';
+      if(q.type==='multiple'){
+        respuesta=d.ans!==undefined&&d.ans!==''?q.options[parseInt(d.ans)]||d.ans:'Sin respuesta';
+        correcta=q.options[parseInt(q.correct)]||q.correct;
+      }else if(q.type==='tf'){
+        respuesta=d.ans||'Sin respuesta';
+        correcta=q.correct;
+      }else{
+        respuesta=d.ans||'Sin respuesta';
+        correcta=q.correct;
+      }
+      answerHtml=`<div class="answer-row"><span class="answer-label">Respondió:</span><span class="answer-val ${d.ok?'ok':'bad'}">${respuesta}</span></div>
+        ${!d.ok?`<div class="answer-row"><span class="answer-label">Correcta:</span><span class="answer-val ok">${correcta}</span></div>`:''}
+        ${q.hint&&!d.ok?`<div class="hint-box" style="margin-top:8px"><strong>Por qué:</strong> ${q.hint}</div>`:''}`;
+    }else{
+      answerHtml=`<div class="answer-row"><span class="answer-label">Respondió:</span><span class="answer-val ${d.ok?'ok':'bad'}">${d.ans||'Sin respuesta'}</span></div>`;
+    }
+    block.innerHTML=`<div class="detail-q-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:500">Pregunta ${i+1}</span>
+          ${q?`<span class="tag ${typeColors[q.type]}" style="font-size:11px">${typeLabels[q.type]}</span>`:''}
+          ${q&&q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+        </div>
+        <span class="tag ${d.ok?'tag-success':'tag-danger'}" style="font-size:11px">${d.ok?'Correcta':'Incorrecta'}</span>
+      </div>
+      ${q?`<div style="font-size:14px;font-weight:500;margin-bottom:10px;line-height:1.5">${q.text}</div>`:''}
+      ${answerHtml}`;
+    qWrap.appendChild(block);
+  });
+
+  panel.classList.add('active');
+  histWrap.style.display='none';
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeDetail(){
+  document.getElementById('detail-panel').classList.remove('active');
+  document.getElementById('hist-wrap').style.display='block';
+}
+
+function resTab(t){
+  ['general','agente','mes','tablero'].forEach(x=>{
+    document.getElementById('res-tab-'+x).classList.toggle('active',x===t);
+    document.getElementById('res-view-'+x).style.display=x===t?'block':'none';
+  });
+  if(t==='agente') buildAgenteFilter();
+  if(t==='mes') buildMesFilter();
+  if(t==='tablero') initTablero();
+}
+
+const MONTH_NAMES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function buildAgenteFilter(){
+  if(!window._allResults) return;
+  const sel=document.getElementById('filter-agente-sel');
+  const agents=[...new Set(window._allResults.map(e=>e.name))].sort();
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Seleccioná un agente</option>';
+  agents.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o);});
+  if(cur) sel.value=cur;
+  renderViewAgente();
+}
+
+function renderViewAgente(){
+  const sel=document.getElementById('filter-agente-sel').value;
+  const wrap=document.getElementById('view-agente-content');
+  if(!sel){wrap.innerHTML='';return;}
+  const data=window._allResults.filter(e=>e.name===sel);
+  if(!data.length){wrap.innerHTML='<div class="empty">Sin resultados para este agente.</div>';return;}
+  const avg=Math.round(data.reduce((a,b)=>a+b.pct,0)/data.length);
+  const best=data.reduce((a,b)=>a.pct>b.pct?a:b);
+  let html=`<div class="stat-grid" style="margin-bottom:1rem">
+    <div class="stat-card"><div class="stat-val">${data.length}</div><div class="stat-lbl">Quizzes tomados</div></div>
+    <div class="stat-card"><div class="stat-val">${avg}%</div><div class="stat-lbl">Promedio</div></div>
+    <div class="stat-card"><div class="stat-val">${best.pct}%</div><div class="stat-lbl">Mejor puntaje</div></div>
+  </div><div class="card" style="padding:0 1.5rem">`;
+  data.forEach(e=>{
+    const safeEntry=JSON.stringify(e).replace(/'/g,"\\'");
+    html+=`<div class="hist-row" style="cursor:pointer" onclick='showDetail(${JSON.stringify(e)})'>
+      <div><div style="font-weight:500">${e.week}</div><div style="font-size:12px;color:var(--text-muted)">${e.date} · ${e.correct}/${e.total} correctas</div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="tag ${e.pct>=60?'tag-success':'tag-danger'}">${e.pct}%</span>
+        <span style="font-size:12px;color:var(--blue);font-weight:500">Ver →</span>
+      </div></div>`;
+  });
+  html+='</div>';
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('.hist-row').forEach((row,i)=>{row.onclick=()=>showDetail(data[i]);});
+}
+
+function buildMesFilter(){
+  if(!window._allResults) return;
+  const sel=document.getElementById('filter-mes-sel');
+  const months=new Set();
+  window._allResults.forEach(e=>{
+    const parts=e.date.split('/');
+    if(parts.length>=2){const m=parseInt(parts[1]);const y=parts[2]||new Date().getFullYear();months.add(`${y}-${String(m).padStart(2,'0')}`);}
+  });
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Seleccioná un mes</option>';
+  [...months].sort().reverse().forEach(k=>{
+    const [y,m]=k.split('-');
+    const o=document.createElement('option');o.value=k;o.textContent=`${MONTH_NAMES[parseInt(m)-1]} ${y}`;sel.appendChild(o);
+  });
+  if(cur) sel.value=cur;
+  renderViewMes();
+}
+
+function renderViewMes(){
+  const sel=document.getElementById('filter-mes-sel').value;
+  const wrap=document.getElementById('view-mes-content');
+  if(!sel){wrap.innerHTML='';return;}
+  const [y,m]=sel.split('-');
+  const data=window._allResults.filter(e=>{
+    const parts=e.date.split('/');if(parts.length<2)return false;
+    return String(parseInt(parts[1])).padStart(2,'0')===m&&(parts[2]||String(new Date().getFullYear()))===y;
+  });
+  if(!data.length){wrap.innerHTML='<div class="empty">Sin resultados para este mes.</div>';return;}
+  const avg=Math.round(data.reduce((a,b)=>a+b.pct,0)/data.length);
+  const best=data.reduce((a,b)=>a.pct>b.pct?a:b);
+  const byUser={};
+  data.forEach(e=>{if(!byUser[e.name])byUser[e.name]={name:e.name,total:0,sum:0,best:0};byUser[e.name].total++;byUser[e.name].sum+=e.pct;if(e.pct>byUser[e.name].best)byUser[e.name].best=e.pct;});
+  const ranking=Object.values(byUser).map(u=>({...u,avg:Math.round(u.sum/u.total)})).sort((a,b)=>b.avg-a.avg);
+  const medals=['🥇','🥈','🥉'];
+  let html=`<div class="stat-grid" style="margin-bottom:1rem">
+    <div class="stat-card"><div class="stat-val">${data.length}</div><div class="stat-lbl">Respuestas</div></div>
+    <div class="stat-card"><div class="stat-val">${avg}%</div><div class="stat-lbl">Promedio del mes</div></div>
+    <div class="stat-card"><div class="stat-val">${best.pct}%</div><div class="stat-lbl">Mejor puntaje</div></div>
+  </div><div class="section-title">Ranking del mes</div>
+  <div class="card" style="padding:0 1.5rem;margin-bottom:1.25rem">`;
+  ranking.forEach((u,i)=>{
+    html+=`<div class="hist-row"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:18px;min-width:28px">${medals[i]||'#'+(i+1)}</span><div><div style="font-weight:500">${u.name}</div><div style="font-size:12px;color:var(--text-muted)">${u.total} quiz${u.total!==1?'zes':''} · Mejor: ${u.best}%</div></div></div><div style="text-align:right"><div style="font-size:18px;font-weight:600;color:var(--blue)">${u.avg}%</div><div style="font-size:11px;color:var(--text-muted)">promedio</div></div></div>`;
+  });
+  html+='</div><div class="section-title">Detalle de respuestas</div><div class="card" style="padding:0 1.5rem">';
+  data.forEach(e=>{
+    html+=`<div class="hist-row res-mes-row" style="cursor:pointer">
+      <div><div style="font-weight:500">${e.name}</div><div style="font-size:12px;color:var(--text-muted)">${e.week} · ${e.date}</div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="font-size:13px;color:var(--text-muted)">${e.correct}/${e.total}</span>
+        <span class="tag ${e.pct>=60?'tag-success':'tag-danger'}">${e.pct}%</span>
+        <span style="font-size:12px;color:var(--blue);font-weight:500">Ver →</span>
+      </div></div>`;
+  });
+  html+='</div>';
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('.res-mes-row').forEach((row,i)=>{row.onclick=()=>showDetail(data[i]);});
+}
+
+function buildRankingFilter(stored){
+  const sel=document.getElementById('ranking-filter');
+  if(!sel) return;
+  const months=new Set();
+  stored.forEach(e=>{
+    const parts=e.date.split('/');
+    if(parts.length>=2){
+      const m=parseInt(parts[1]);const y=parts[2]||new Date().getFullYear();
+      months.add(`${y}-${String(m).padStart(2,'0')}`);
+    }
+  });
+  const current=sel.value;
+  sel.innerHTML='<option value="all">Todos los meses</option>';
+  const monthNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  [...months].sort().reverse().forEach(k=>{
+    const [y,m]=k.split('-');
+    const opt=document.createElement('option');
+    opt.value=k;opt.textContent=`${monthNames[parseInt(m)-1]} ${y}`;
+    sel.appendChild(opt);
+  });
+  sel.value=current||'all';
+}
+
+function filterRanking(){
+  if(!window._allResults) return;
+  const val=document.getElementById('ranking-filter').value;
+  let filtered=window._allResults;
+  if(val!=='all'){
+    const [y,m]=val.split('-');
+    filtered=window._allResults.filter(e=>{
+      const parts=e.date.split('/');
+      if(parts.length<2) return false;
+      const em=String(parseInt(parts[1])).padStart(2,'0');
+      const ey=parts[2]||String(new Date().getFullYear());
+      return em===m&&ey===y;
+    });
+  }
+  renderRanking(filtered);
+}
+
+function downloadExcel(){
+  if(!window._allResults||!window._allResults.length){alert('No hay resultados para descargar.');return;}
+  const val=document.getElementById('ranking-filter').value;
+  let data=window._allResults;
+  let periodo='Todos los meses';
+  if(val!=='all'){
+    const [y,m]=val.split('-');
+    const monthNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    periodo=monthNames[parseInt(m)-1]+' '+y;
+    data=window._allResults.filter(e=>{
+      const parts=e.date.split('/');
+      if(parts.length<2) return false;
+      const em=String(parseInt(parts[1])).padStart(2,'0');
+      const ey=parts[2]||String(new Date().getFullYear());
+      return em===m&&ey===y;
+    });
+  }
+  if(!data.length){alert('No hay resultados para el período seleccionado.');return;}
+  const headers=['Nombre','Usuario','Semana','Fecha','Correctas','Total','Porcentaje'];
+  const rows=data.map(e=>[e.name,e.user_id||'',e.week,e.date,e.correct,e.total,e.pct+'%']);
+  let csv=headers.join(',')+'\n';
+  rows.forEach(r=>{csv+=r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')+'\n';});
+  const bom='﻿';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='resultados_'+periodo.replace(/ /g,'_')+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderRanking(data){
+  const medals=['🥇','🥈','🥉'];
+  const byUser={};
+  data.forEach(function(e){
+    if(!byUser[e.name]) byUser[e.name]={name:e.name,total:0,sum:0,best:0};
+    byUser[e.name].total++;
+    byUser[e.name].sum+=e.pct;
+    if(e.pct>byUser[e.name].best) byUser[e.name].best=e.pct;
+  });
+  var ranking=Object.values(byUser).map(function(u){return Object.assign({},u,{avg:Math.round(u.sum/u.total)});}).sort(function(a,b){return b.avg-a.avg;});
+  var rankList=document.getElementById('admin-ranking');rankList.innerHTML='';
+  if(!ranking.length){rankList.innerHTML='<div class="empty" style="padding:1.5rem 0">Sin resultados para este período.</div>';return;}
+  ranking.forEach(function(u,i){
+    var row=document.createElement('div');row.className='hist-row';
+    var medal=medals[i]?medals[i]:('#'+(i+1));
+    var quizLabel=u.total!==1?'quizzes':'quiz';
+    row.innerHTML='<div style="display:flex;align-items:center;gap:12px"><span style="font-size:18px;min-width:28px">'+medal+'</span><div><div style="font-weight:500">'+u.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+u.total+' '+quizLabel+' tomados · Mejor: '+u.best+'%</div></div></div><div style="text-align:right"><div style="font-size:18px;font-weight:600;color:var(--blue)">'+u.avg+'%</div><div style="font-size:11px;color:var(--text-muted)">promedio</div></div>';
+    rankList.appendChild(row);
+  });
+}
+
+
+async function clearResults(){
+  if(!confirm('¿Borrar todos los resultados?')) return;
+  try{await sb('cx_results','DELETE',null,'?id=gte.0');renderAdminResults();}catch(e){alert('Error al limpiar.');}
+}
+
+// ---- QUIZ AGENTE ----
+async function initAgenteQuiz(){
+  ['agente-start','agente-no-quiz','agente-play','agente-done'].forEach(id=>document.getElementById(id).style.display='none');
+  if(currentQuiz){
+    // Chequear si el quiz está vencido (más de 24hs)
+    const quizzes=await sb('cx_quiz','GET',null,'?select=*&order=id.desc&limit=1').catch(()=>[]);
+    const latestQuiz=quizzes[0];
+    const isExpired=latestQuiz&&latestQuiz.created_at&&((Date.now()-new Date(latestQuiz.created_at).getTime())/(1000*60*60))>=24;
+    if(isExpired){
+      document.getElementById('agente-no-quiz').style.display='block';
+      document.getElementById('agente-no-quiz').innerHTML=`<div style="text-align:center;padding:3rem 0">
+        <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">El quiz de esta semana ya cerró</div>
+        <div style="font-size:14px;color:var(--text-muted)">${currentQuiz.week}</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:6px">El próximo quiz estará disponible pronto.</div>
+      </div>`;
+      return;
+    }
+    // Chequear si el agente ya hizo este quiz
+    try{
+      const done=await sb('cx_results','GET',null,`?user_id=eq.${currentUser.user_id}&week=eq.${encodeURIComponent(currentQuiz.week)}&select=id`);
+      if(done.length){
+        document.getElementById('agente-no-quiz').style.display='block';
+        document.getElementById('agente-no-quiz').innerHTML=`<div style="text-align:center;padding:3rem 0">
+          <div style="font-size:2rem;margin-bottom:12px">✅</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">¡Ya completaste el quiz de esta semana!</div>
+          <div style="font-size:14px;color:var(--text-muted)">${currentQuiz.week}</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:6px">Podés ver tu resultado en <strong>Mis resultados</strong>.</div>
+        </div>`;
+        return;
+      }
+    }catch(e){}
+    document.getElementById('agente-no-quiz').innerHTML='No hay un quiz activo por ahora. Volvé más tarde.';
+    document.getElementById('agente-start').style.display='block';
+    document.getElementById('agente-quiz-title').textContent=currentQuiz.week;
+    document.getElementById('agente-quiz-team').textContent=currentQuiz.team||'';
+    document.getElementById('agente-quiz-sub').textContent=currentQuiz.questions.length+' preguntas · '+currentQuiz.date;
+  }else{
+    document.getElementById('agente-no-quiz').innerHTML='No hay un quiz activo por ahora. Volvé más tarde.';
+    document.getElementById('agente-no-quiz').style.display='block';
+  }
+}
+
+function startQuiz(){
+  playerAnswers={};
+  document.getElementById('agente-start').style.display='none';
+  document.getElementById('agente-play').style.display='block';
+  renderPlay();
+}
+
+function renderPlay(){
+  const wrap=document.getElementById('play-wrap');wrap.innerHTML='';
+  const letters=['A','B','C','D'];
+  currentQuiz.questions.forEach((q,i)=>{
+    const div=document.createElement('div');div.className='q-block fade-in';
+    let html=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;display:flex;justify-content:space-between">
+        <span>Pregunta ${i+1} de ${currentQuiz.questions.length}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${q.type==='multiple'?`<span style="font-size:11px;color:var(--text-muted);font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px">1 opción correcta</span>`:''}
+          <span class="tag ${q.type==='multiple'?'tag-multiple':q.type==='tf'?'tag-tf':'tag-escrita'}" style="font-size:11px">${q.type==='multiple'?'Múltiple':q.type==='tf'?'V/F':'Escrita'}</span>
+        </div>
+      </div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:14px;line-height:1.5">${q.text}</div>`;
+    if(q.type==='multiple'){
+      q.options.forEach((opt,j)=>{
+        html+=`<button class="opt-btn" id="opt-${i}-${j}" onclick="selectOpt(${i},${j})"><span class="opt-letter">${letters[j]}</span>${opt}</button>`;
+      });
+    }else if(q.type==='tf'){
+      ['Verdadero','Falso'].forEach((opt,j)=>{
+        html+=`<button class="opt-btn" id="opt-${i}-${j}" onclick="selectOpt(${i},${j})"><span class="opt-letter">${j===0?'V':'F'}</span>${opt}</button>`;
+      });
+    }else{
+      html+=`<label style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Escribí tu respuesta:</label>
+        <textarea class="written-input" id="written-${i}" placeholder="Escribí acá..." oninput="playerAnswers[${i}]=this.value;updateProg()"></textarea>`;
+    }
+    div.innerHTML=html;wrap.appendChild(div);
+  });
+  updateProg();
+}
+
+function selectOpt(qi,oi){
+  const q=currentQuiz.questions[qi];
+  playerAnswers[qi]=q.type==='tf'?(oi===0?'Verdadero':'Falso'):String(oi);
+  const total=q.type==='tf'?2:q.options.length;
+  for(let j=0;j<total;j++){const btn=document.getElementById(`opt-${qi}-${j}`);if(btn)btn.classList.toggle('selected',j===oi);}
+  updateProg();
+}
+
+function updateProg(){
+  const t=currentQuiz.questions.length;let a=0;
+  currentQuiz.questions.forEach((q,i)=>{
+    if(q.type==='escrita'){const el=document.getElementById('written-'+i);if(el&&el.value.trim())a++;}
+    else if(playerAnswers[i]!==undefined) a++;
+  });
+  document.getElementById('prog-fill').style.width=Math.round((a/t)*100)+'%';
+  document.getElementById('play-counter').textContent=`${a} de ${t} respondidas`;
+}
+
+function checkWritten(answer,correct){
+  if(!answer||!correct) return false;
+  const keywords=correct.toLowerCase().split(',').map(k=>k.trim()).filter(k=>k);
+  return keywords.some(k=>answer.toLowerCase().includes(k));
+}
+
+async function submitQuiz(){
+  const total=currentQuiz.questions.length;let unanswered=0;
+  currentQuiz.questions.forEach((q,i)=>{
+    if(q.type==='escrita'){const el=document.getElementById('written-'+i);if(!el||!el.value.trim())unanswered++;else playerAnswers[i]=el.value.trim();}
+    else if(playerAnswers[i]===undefined) unanswered++;
+  });
+  if(unanswered>0&&!confirm(`Quedan ${unanswered} sin responder. ¿Enviás igual?`)) return;
+  let correct=0;
+  const details=currentQuiz.questions.map((q,i)=>{
+    const ans=playerAnswers[i]||'';let ok=false;
+    if(q.type==='multiple') ok=ans===q.correct;
+    else if(q.type==='tf') ok=ans===q.correct;
+    else ok=checkWritten(ans,q.correct);
+    if(ok) correct++;
+    return{ans,ok};
+  });
+  const pct=Math.round((correct/total)*100);
+  try{
+    await sb('cx_results','POST',{user_id:currentUser.user_id,name:currentUser.name,week:currentQuiz.week,correct,total,pct,date:new Date().toLocaleDateString('es-AR'),details:JSON.stringify(details),questions:JSON.stringify(currentQuiz.questions)});
+  }catch(e){console.error('Error guardando resultado',e);}
+  document.getElementById('agente-play').style.display='none';
+  document.getElementById('agente-done').style.display='block';
+  document.getElementById('done-score').textContent=pct+'%';
+  document.getElementById('done-detail').textContent=`${correct} de ${total} correctas · ${currentQuiz.week}`;
+  setTimeout(()=>{document.getElementById('done-bar').style.width=pct+'%';},100);
+  const letters=['A','B','C','D'];const review=document.getElementById('done-review');review.innerHTML='';
+  currentQuiz.questions.forEach((q,i)=>{
+    const d=details[i];const c=document.createElement('div');c.className='q-block fade-in';
+    let html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--text-muted)">Pregunta ${i+1}</span>
+        <span class="tag ${d.ok?'tag-success':'tag-danger'}" style="font-size:11px">${d.ok?'Correcta':'Incorrecta'}</span>
+        ${q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+      </div>
+      <div style="font-weight:500;margin-bottom:12px;line-height:1.5">${q.text}</div>`;
+    if(q.type==='multiple'){
+      q.options.forEach((opt,j)=>{
+        let cls='opt-btn';
+        if(j===parseInt(q.correct)) cls+=' correct';
+        else if(String(j)===d.ans&&!d.ok) cls+=' wrong';
+        html+=`<div class="${cls}"><span class="opt-letter">${letters[j]}</span>${opt}</div>`;
+      });
+    }else if(q.type==='tf'){
+      ['Verdadero','Falso'].forEach((opt,j)=>{
+        let cls='opt-btn';
+        if(opt===q.correct) cls+=' correct';
+        else if(opt===d.ans&&!d.ok) cls+=' wrong';
+        html+=`<div class="${cls}"><span class="opt-letter">${j===0?'V':'F'}</span>${opt}</div>`;
+      });
+    }else{
+      html+=`<div style="margin-bottom:8px"><label>Tu respuesta:</label>
+        <div class="written-input ${d.ok?'correct-written':'wrong-written'}" style="min-height:auto;padding:10px 12px">${d.ans||'Sin respuesta'}</div></div>
+        <div><label>Respuesta esperada:</label><div style="font-size:13px;color:var(--text-muted);padding:6px 0">${q.correct}</div></div>`;
+    }
+    if(q.hint&&!d.ok) html+=`<div class="hint-box"><strong>Por qué:</strong> ${q.hint}</div>`;
+    c.innerHTML=html;review.appendChild(c);
+  });
+}
+
+function resetQuiz(){initAgenteQuiz();}
+
+// ---- RECURSOS ----
+async function addResource(){
+  const title=document.getElementById('res-title').value.trim();
+  const link=document.getElementById('res-link').value.trim();
+  const cat=document.getElementById('res-cat').value;
+  if(!title||!link){alert('Completá título y link.');return;}
+  try{
+    await sb('cx_resources','POST',{title,link,cat});
+    document.getElementById('res-title').value='';document.getElementById('res-link').value='';
+    renderAdminResources();renderAgenteResources();
+  }catch(e){alert('Error al guardar.');}
+}
+
+async function removeResource(id){
+  if(!confirm('¿Eliminar este recurso?')) return;
+  try{await sb('cx_resources','DELETE',null,`?id=eq.${id}`);renderAdminResources();}catch(e){alert('Error.');}
+}
+
+async function renderAdminResources(){
+  const list=document.getElementById('resources-list-admin');list.innerHTML='';
+  try{
+    const res=await sb('cx_resources','GET',null,'?select=*&order=id.desc');
+    if(!res.length){list.innerHTML='<div class="empty">No hay recursos todavía.</div>';return;}
+    res.forEach(r=>{
+      const el=document.createElement('div');el.className='resource-card';
+      el.innerHTML=`<div><div style="font-weight:500;font-size:14px">${r.title}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">${r.cat} · ${r.link}</div></div>
+        <button class="btn btn-sm btn-danger" onclick="removeResource(${r.id})">Eliminar</button>`;
+      list.appendChild(el);
+    });
+  }catch(e){}
+}
+
+async function renderAgenteResources(){
+  const list=document.getElementById('agente-resources-list');const empty=document.getElementById('agente-res-empty');
+  list.innerHTML='';
+  try{
+    const res=await sb('cx_resources','GET',null,'?select=*&order=id.desc');
+    if(!res.length){empty.style.display='block';return;}
+    empty.style.display='none';
+    res.forEach(r=>{
+      const el=document.createElement('div');el.className='resource-card';
+      const isLink=r.link.startsWith('http');
+      el.innerHTML=`<div><div style="font-weight:500;font-size:14px">${r.title}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">${r.cat}</div></div>
+        ${isLink?`<a href="${r.link}" target="_blank" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">Abrir →</a>`:`<span style="font-size:12px;color:var(--text-muted)">${r.link}</span>`}`;
+      list.appendChild(el);
+    });
+  }catch(e){}
+}
+
+// ---- USUARIOS ----
+async function renderUsers(){
+  const list=document.getElementById('users-list');list.innerHTML='';
+  try{
+    const users=await sb('cx_users','GET',null,'?select=*&order=id.asc');
+    users.forEach(u=>{
+      const row=document.createElement('div');row.className='user-row';
+      row.innerHTML=`<div>
+          <div style="font-weight:500">${u.name}</div>
+          <div style="font-size:12px;color:var(--text-muted)">@${u.user_id} · ${u.pass}${u.email?` · ${u.email}`:' · <span style="color:#E74C3C">sin email</span>'}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag ${u.role==='admin'?'tag-admin':'tag-agente'}" style="font-size:11px">${u.role}</span>
+          ${u.user_id!==currentUser.user_id?`<button class="btn btn-sm btn-danger" onclick="removeUser(${u.id})">×</button>`:''}
+        </div>`;
+      list.appendChild(row);
+    });
+  }catch(e){}
+}
+
+async function addUser(){
+  const user=document.getElementById('new-user').value.trim();
+  const pass=document.getElementById('new-pass').value.trim();
+  const name=document.getElementById('new-name').value.trim();
+  const email=document.getElementById('new-email').value.trim();
+  const role=document.getElementById('new-role').value;
+  if(!user||!pass||!name){alert('Completá todos los campos.');return;}
+  try{
+    await sb('cx_users','POST',{user_id:user,pass,role,name,email});
+    document.getElementById('new-user').value='';
+    document.getElementById('new-pass').value='';
+    document.getElementById('new-name').value='';
+    document.getElementById('new-email').value='';
+    renderUsers();
+  }catch(e){alert('Error. Puede que ese usuario ya exista.');}
+}
+
+async function removeUser(id){
+  if(!confirm('¿Eliminar este usuario?')) return;
+  try{await sb('cx_users','DELETE',null,`?id=eq.${id}`);renderUsers();}catch(e){alert('Error.');}
+}
+
+// ---- MIS RESULTADOS ----
+let _myAllResults=[];
+
+async function renderMyResults(){
+  const empty=document.getElementById('my-res-empty');const content=document.getElementById('my-res-content');
+  try{
+    const [stored, quizzes]=await Promise.all([
+      sb('cx_results','GET',null,`?user_id=eq.${currentUser.user_id}&order=created_at.desc`),
+      sb('cx_quiz','GET',null,'?select=*&order=id.desc')
+    ]);
+    if(!stored.length){empty.style.display='block';content.style.display='none';return;}
+    // Cruzar resultados con preguntas del quiz correspondiente
+    const quizByWeek={};
+    quizzes.forEach(q=>{if(q.data&&q.data.week)quizByWeek[q.data.week]=q.data.questions;});
+    stored.forEach(e=>{
+      if(!e.questions&&quizByWeek[e.week]){
+        e.questions=quizByWeek[e.week];
+      }
+    });
+    _myAllResults=stored;
+    empty.style.display='none';content.style.display='block';
+    const avg=Math.round(stored.reduce((a,b)=>a+b.pct,0)/stored.length);
+    const best=stored.reduce((a,b)=>a.pct>b.pct?a:b);
+    document.getElementById('my-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-val">${stored.length}</div><div class="stat-lbl">Quizzes tomados</div></div>
+      <div class="stat-card"><div class="stat-val">${avg}%</div><div class="stat-lbl">Mi promedio</div></div>
+      <div class="stat-card"><div class="stat-val">${best.pct}%</div><div class="stat-lbl">Mi mejor puntaje</div></div>`;
+    const sel=document.getElementById('my-mes-filter');
+    const months=new Set();
+    stored.forEach(e=>{
+      const parts=e.date.split('/');
+      if(parts.length>=2){const m=parseInt(parts[1]);const y=parts[2]||new Date().getFullYear();months.add(`${y}-${String(m).padStart(2,'0')}`);}
+    });
+    const curVal=sel.value;
+    sel.innerHTML='<option value="all">Todos los meses</option>';
+    [...months].sort().reverse().forEach(k=>{
+      const [y,m]=k.split('-');
+      const o=document.createElement('option');o.value=k;o.textContent=`${MONTH_NAMES[parseInt(m)-1]} ${y}`;sel.appendChild(o);
+    });
+    sel.value=curVal||'all';
+    renderMyResultsByMonth();
+  }catch(e){}
+}
+
+function renderMyResultsByMonth(){
+  const val=document.getElementById('my-mes-filter').value;
+  let data=_myAllResults;
+  if(val!=='all'){
+    const [y,m]=val.split('-');
+    data=_myAllResults.filter(e=>{
+      const parts=e.date.split('/');if(parts.length<2)return false;
+      return String(parseInt(parts[1])).padStart(2,'0')===m&&(parts[2]||String(new Date().getFullYear()))===y;
+    });
+  }
+  const list=document.getElementById('my-hist');list.innerHTML='';
+  if(!data.length){list.innerHTML='<div class="empty" style="padding:1.5rem 0">Sin resultados para este mes.</div>';return;}
+  data.forEach((e,idx)=>{
+    const row=document.createElement('div');row.className='hist-row';row.style.cursor='pointer';
+    row.innerHTML=`<div><div style="font-weight:500">${e.week}</div><div style="font-size:12px;color:var(--text-muted)">${e.date} · ${e.correct}/${e.total} correctas</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="tag ${e.pct>=60?'tag-success':'tag-danger'}">${e.pct}%</span>
+        <span style="font-size:12px;color:var(--blue);font-weight:600">Ver →</span>
+      </div>`;
+    row.onclick=()=>showMyReview(e);
+    list.appendChild(row);
+  });
+}
+
+function showMyReview(entry){
+  const typeLabels={multiple:'Múltiple',tf:'V/F',escrita:'Escrita'};
+  const typeColors={multiple:'tag-multiple',tf:'tag-tf',escrita:'tag-escrita'};
+  let details=entry.details;
+  if(typeof details==='string'){try{details=JSON.parse(details);}catch(e){details=null;}}
+
+  // Intentar obtener preguntas — primero del resultado guardado, luego del quiz actual
+  let questions=null;
+  if(entry.questions){
+    let qs=entry.questions;
+    if(typeof qs==='string'){try{qs=JSON.parse(qs);}catch(e){qs=null;}}
+    questions=qs;
+  }
+  if(!questions&&currentQuiz&&currentQuiz.week===entry.week){
+    questions=currentQuiz.questions;
+  }
+
+  document.getElementById('my-res-empty').style.display='none';
+  document.getElementById('my-res-content').style.display='none';
+
+  let panel=document.getElementById('my-review-panel');
+  if(!panel){
+    panel=document.createElement('div');
+    panel.id='my-review-panel';
+    document.getElementById('agente-mis-resultados').appendChild(panel);
+  }
+
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+    <div>
+      <div style="font-size:15px;font-weight:600">${entry.week}</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:2px">${entry.date} · ${entry.correct}/${entry.total} correctas · <span style="font-weight:600;color:${entry.pct>=60?'var(--success)':'var(--danger)'}">${entry.pct}%</span></div>
+    </div>
+    <button class="btn btn-sm" onclick="closeMyReview()">← Volver</button>
+  </div>`;
+
+  if(!details||!details.length){
+    html+='<div class="empty">No hay detalle disponible para este resultado.</div>';
+  }else{
+    details.forEach((d,i)=>{
+      const q=questions&&questions[i];
+      let answerHtml='';
+      if(q){
+        let respuesta='',correcta='';
+        if(q.type==='multiple'){
+          respuesta=d.ans!==undefined&&d.ans!==''?q.options[parseInt(d.ans)]||d.ans:'Sin respuesta';
+          correcta=q.options[parseInt(q.correct)]||q.correct;
+        }else{respuesta=d.ans||'Sin respuesta';correcta=q.correct;}
+        answerHtml=`<div class="answer-row"><span class="answer-label">Respondiste:</span><span class="answer-val ${d.ok?'ok':'bad'}">${respuesta}</span></div>
+          ${!d.ok?`<div class="answer-row"><span class="answer-label">Correcta:</span><span class="answer-val ok">${correcta}</span></div>`:''}
+          ${q.hint&&!d.ok?`<div class="hint-box" style="margin-top:8px"><strong>Por qué:</strong> ${q.hint}</div>`:''}`;
+      }else{
+        answerHtml=`<div class="answer-row"><span class="answer-label">Respondiste:</span><span class="answer-val ${d.ok?'ok':'bad'}">${d.ans||'Sin respuesta'}</span></div>`;
+      }
+      html+=`<div class="detail-q">
+        <div class="detail-q-header">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:var(--text-muted);font-weight:500">Pregunta ${i+1}</span>
+            ${q?`<span class="tag ${typeColors[q.type]}" style="font-size:11px">${typeLabels[q.type]}</span>`:''}
+            ${q&&q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+          </div>
+          <span class="tag ${d.ok?'tag-success':'tag-danger'}" style="font-size:11px">${d.ok?'Correcta':'Incorrecta'}</span>
+        </div>
+        ${q?`<div style="font-size:14px;font-weight:500;margin-bottom:10px;line-height:1.5">${q.text}</div>`:''}
+        ${answerHtml}
+      </div>`;
+    });
+  }
+  panel.innerHTML=html;
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeMyReview(){
+  const panel=document.getElementById('my-review-panel');
+  if(panel) panel.style.display='none';
+  document.getElementById('my-res-content').style.display='block';
+}
+
+// ---- EVALUACIONES ----
+let evalQuestions=[];
+let currentEval=null;
+let evalAnswers={};
+
+const MODULOS=['Cuenta comitente','Transferencia de dinero','Transferencia de titulos','Operaciones','Loyalty','Crypto','Pay','Tarjeta'];
+
+function addEvalQuestion(type){
+  const q={type,text:'',correct:'',hint:'',modulo:''};
+  if(type==='multiple') q.options=['','','',''];
+  if(type==='tf') q.options=['Verdadero','Falso'];
+  evalQuestions.push(q);renderEvalQList();
+}
+function removeEvalQuestion(i){evalQuestions.splice(i,1);renderEvalQList();}
+function clearEvalQuestions(){if(confirm('¿Limpiar todas las preguntas?')){evalQuestions=[];renderEvalQList();}}
+
+function renderEvalQList(){
+  const list=document.getElementById('eval-q-list');list.innerHTML='';
+  const letters=['A','B','C','D'];
+  const typeLabels={multiple:'Opción múltiple',tf:'Verdadero / Falso',escrita:'Respuesta escrita'};
+  const typeColors={multiple:'tag-multiple',tf:'tag-tf',escrita:'tag-escrita'};
+  evalQuestions.forEach((q,i)=>{
+    const block=document.createElement('div');block.className='q-block';
+    let optsHtml='';
+    if(q.type==='multiple'){
+      optsHtml=`<div style="margin-top:10px"><label>Opciones</label>`;
+      q.options.forEach((opt,j)=>{
+        optsHtml+=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:600;min-width:16px">${letters[j]}</span>
+          <input type="text" value="${opt}" placeholder="Opción ${letters[j]}" oninput="evalQuestions[${i}].options[${j}]=this.value" style="flex:1" />
+          <button class="btn btn-sm ${q.correct===String(j)?'btn-primary':''}" onclick="evalQuestions[${i}].correct='${j}';renderEvalQList()" style="white-space:nowrap;font-size:12px">${q.correct===String(j)?'✓ Correcta':'Correcta'}</button>
+        </div>`;
+      });
+      optsHtml+='</div>';
+    }else if(q.type==='tf'){
+      optsHtml=`<div style="margin-top:10px"><label>Respuesta correcta</label><div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-sm ${q.correct==='Verdadero'?'btn-primary':''}" onclick="evalQuestions[${i}].correct='Verdadero';renderEvalQList()">Verdadero</button>
+        <button class="btn btn-sm ${q.correct==='Falso'?'btn-primary':''}" onclick="evalQuestions[${i}].correct='Falso';renderEvalQList()">Falso</button>
+      </div></div>`;
+    }else{
+      optsHtml=`<div style="margin-top:10px"><label>Palabras clave correctas (separadas por coma)</label>
+        <input type="text" value="${q.correct}" placeholder="Ej: USD 2000, BIND PSP" oninput="evalQuestions[${i}].correct=this.value" /></div>`;
+    }
+    block.innerHTML=`<div class="q-block-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:500">Pregunta ${i+1}</span>
+          <span class="tag ${typeColors[q.type]}" style="font-size:11px">${typeLabels[q.type]}</span>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="removeEvalQuestion(${i})">Eliminar</button>
+      </div>
+      <label>Enunciado</label>
+      <textarea style="min-height:60px" placeholder="Escribí la pregunta..." oninput="evalQuestions[${i}].text=this.value">${q.text}</textarea>
+      ${optsHtml}
+      <div style="margin-top:10px"><label>Explicación cuando se equivoca (opcional)</label>
+        <input type="text" value="${q.hint}" placeholder="Ej: El límite es USD 2.000..." oninput="evalQuestions[${i}].hint=this.value" /></div>
+      <div style="margin-top:10px"><label>Módulo del manual</label>
+        <select onchange="evalQuestions[${i}].modulo=this.value">
+          <option value="">Sin módulo</option>
+          ${MODULOS.map(m=>`<option value="${m}" ${q.modulo===m?'selected':''}>${m}</option>`).join('')}
+        </select></div>`;
+    list.appendChild(block);
+  });
+  document.getElementById('eval-q-counter').textContent=`(${evalQuestions.length} cargadas)`;
+}
+
+async function crearEvaluacion(){
+  const nombre=document.getElementById('eval-nombre').value.trim();
+  const desc=document.getElementById('eval-desc').value.trim();
+  const minimo=parseInt(document.getElementById('eval-minimo').value)||60;
+  if(!nombre){alert('Escribí el nombre de la capacitación.');return;}
+  if(!evalQuestions.length){alert('Agregá al menos una pregunta.');return;}
+  for(let i=0;i<evalQuestions.length;i++){
+    if(!evalQuestions[i].text.trim()){alert(`La pregunta ${i+1} no tiene enunciado.`);return;}
+    if(evalQuestions[i].type!=='escrita'&&!evalQuestions[i].correct){alert(`La pregunta ${i+1} no tiene respuesta correcta.`);return;}
+    if(evalQuestions[i].type==='multiple'&&evalQuestions[i].options.some(o=>!o.trim())){alert(`La pregunta ${i+1} tiene opciones vacías.`);return;}
+  }
+  try{
+    const data={nombre,desc,minimo,questions:evalQuestions,createdBy:currentUser.name,date:new Date().toLocaleDateString('es-AR'),activa:true};
+    await sb('cx_evaluaciones','POST',{data});
+    evalQuestions=[];renderEvalQList();
+    document.getElementById('eval-nombre').value='';
+    document.getElementById('eval-desc').value='';
+    document.getElementById('eval-minimo').value='';
+    alert(`Evaluación "${nombre}" creada y activada.`);
+    renderAdminEvalLista();
+  }catch(e){alert('Error al guardar. Verificá que la tabla cx_evaluaciones exista en Supabase.');}
+}
+
+async function renderAdminEvalLista(){
+  const wrap=document.getElementById('admin-eval-lista');
+  try{
+    const evals=await sb('cx_evaluaciones','GET',null,'?select=*&order=id.desc');
+    if(!evals.length){wrap.innerHTML='<div class="empty">No hay evaluaciones creadas.</div>';return;}
+    wrap.innerHTML='';
+    evals.forEach(ev=>{
+      const d=ev.data;
+      const card=document.createElement('div');card.className='card';card.style.marginBottom='10px';
+      card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:600;font-size:15px">${d.nombre}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px">${d.questions.length} preguntas · Mínimo: ${d.minimo}% · ${d.date}</div>
+          ${d.desc?`<div style="font-size:13px;color:var(--text-muted);margin-top:4px">${d.desc}</div>`:''}
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:12px">
+          <span class="tag ${d.activa?'tag-success':'tag-muted'}">${d.activa?'Activa':'Inactiva'}</span>
+          <button class="btn btn-sm" onclick="toggleEval(${ev.id},${!d.activa})">${d.activa?'Desactivar':'Activar'}</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarEval(${ev.id})">Eliminar</button>
+        </div>
+      </div>`;
+      wrap.appendChild(card);
+    });
+  }catch(e){wrap.innerHTML='<div class="empty" style="color:var(--danger)">Error al cargar. Creá la tabla cx_evaluaciones en Supabase.</div>';}
+}
+
+async function toggleEval(id,activa){
+  try{
+    const ev=await sb('cx_evaluaciones','GET',null,`?id=eq.${id}`);
+    if(!ev.length) return;
+    const updated={...ev[0].data,activa};
+    await sb('cx_evaluaciones','PATCH',{data:updated},`?id=eq.${id}`);
+    renderAdminEvalLista();
+  }catch(e){alert('Error al actualizar.');}
+}
+
+async function eliminarEval(id){
+  if(!confirm('¿Eliminar esta evaluación y sus resultados?')) return;
+  try{
+    await sb('cx_eval_resultados','DELETE',null,`?eval_id=eq.${id}`);
+    await sb('cx_evaluaciones','DELETE',null,`?id=eq.${id}`);
+    renderAdminEvalLista();renderAdminEvalResultados();
+  }catch(e){alert('Error al eliminar.');}
+}
+
+async function renderAdminEvalResultados(){
+  const wrap=document.getElementById('admin-eval-resultados');
+  try{
+    const resultados=await sb('cx_eval_resultados','GET',null,'?estado=eq.pendiente&order=created_at.desc&select=*');
+    if(!resultados.length){wrap.innerHTML='<div class="empty">No hay resultados pendientes de revisión.</div>';return;}
+    wrap.innerHTML='';
+    // Group by eval
+    const byEval={};
+    resultados.forEach(r=>{if(!byEval[r.eval_nombre])byEval[r.eval_nombre]=[];byEval[r.eval_nombre].push(r);});
+    Object.entries(byEval).forEach(([nombre,items])=>{
+      const section=document.createElement('div');
+      section.innerHTML=`<div class="section-title" style="margin-top:1rem">${nombre}</div>`;
+      const card=document.createElement('div');card.className='card';card.style.padding='0 1.5rem';
+      items.forEach(r=>{
+        const row=document.createElement('div');row.className='hist-row';
+        row.innerHTML=`<div>
+            <div style="font-weight:500">${r.name}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${r.fecha} · ${r.correct}/${r.total} correctas</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="tag ${r.pct>=r.minimo?'tag-success':'tag-danger'}">${r.pct}%</span>
+            <span style="font-size:12px;color:var(--text-muted)">${r.pct>=r.minimo?'Alcanzó el mínimo':'Bajo el mínimo'}</span>
+            <button class="btn btn-sm btn-primary" onclick="aprobarEvalResultado(${r.id})">Aprobar</button>
+            <button class="btn btn-sm btn-danger" onclick="rechazarEvalResultado(${r.id})">Rechazar</button>
+          </div>`;
+        card.appendChild(row);
+      });
+      section.appendChild(card);
+      wrap.appendChild(section);
+    });
+  }catch(e){wrap.innerHTML='<div class="empty">No hay resultados o la tabla no existe aún.</div>';}
+}
+
+async function aprobarEvalResultado(id){
+  try{await sb('cx_eval_resultados','PATCH',{estado:'aprobado'},`?id=eq.${id}`);renderAdminEvalResultados();}catch(e){alert('Error.');}
+}
+async function rechazarEvalResultado(id){
+  try{await sb('cx_eval_resultados','PATCH',{estado:'rechazado'},`?id=eq.${id}`);renderAdminEvalResultados();}catch(e){alert('Error.');}
+}
+
+// ---- EVALUACIONES AGENTE ----
+async function renderAgenteEvalLista(){
+  const lista=document.getElementById('agente-eval-lista');
+  document.getElementById('agente-eval-play').style.display='none';
+  document.getElementById('agente-eval-done').style.display='none';
+  lista.style.display='block';
+  try{
+    const [evals,misResultados]=await Promise.all([
+      sb('cx_evaluaciones','GET',null,'?select=*&order=id.desc'),
+      sb('cx_eval_resultados','GET',null,`?user_id=eq.${currentUser.user_id}&order=created_at.desc`)
+    ]);
+    const activas=evals.filter(ev=>ev.data.activa);
+    if(!activas.length){lista.innerHTML='<div class="empty">No hay evaluaciones activas por ahora.</div>';return;}
+    lista.innerHTML='';
+    activas.forEach(ev=>{
+      const d=ev.data;
+      // Find my latest result for this eval
+      const misDeEsta=misResultados.filter(r=>r.eval_id===ev.id);
+      const ultimo=misDeEsta[0];
+      const aprobado=misDeEsta.some(r=>r.estado==='aprobado');
+      const pendiente=ultimo&&ultimo.estado==='pendiente';
+      const card=document.createElement('div');card.className='card card-accent';card.style.marginBottom='12px';
+      let estadoHtml='';
+      let btnHtml='';
+      if(aprobado){
+        estadoHtml=`<span class="tag tag-success" style="font-size:12px">✓ Aprobada</span>`;
+        btnHtml='';
+      }else if(pendiente){
+        estadoHtml=`<span class="tag tag-muted" style="font-size:12px">Pendiente de revisión</span>`;
+        btnHtml=`<div style="font-size:13px;color:var(--text-muted);margin-top:8px">Tu último intento está siendo revisado por el admin.</div>`;
+      }else{
+        const rechazado=ultimo&&ultimo.estado==='rechazado';
+        estadoHtml=rechazado?`<span class="tag tag-danger" style="font-size:12px">Rechazado — podés reintentar</span>`:'';
+        btnHtml=`<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="iniciarEval(${ev.id})">${misDeEsta.length?'Reintentar evaluación':'Comenzar evaluación'}</button>`;
+      }
+      card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-weight:600;font-size:15px">${d.nombre}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px">${d.questions.length} preguntas · Mínimo aprobatorio: ${d.minimo}%</div>
+          ${d.desc?`<div style="font-size:13px;color:var(--text-muted);margin-top:4px">${d.desc}</div>`:''}
+          ${misDeEsta.length?`<div style="font-size:12px;color:var(--text-muted);margin-top:4px">${misDeEsta.length} intento${misDeEsta.length!==1?'s':''} realizados</div>`:''}
+        </div>
+        <div>${estadoHtml}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        ${btnHtml}
+        ${misDeEsta.length?`<button class="btn btn-sm" onclick="verIntentosEval(${ev.id})">Ver mis intentos</button>`:''}
+      </div>`;
+      lista.appendChild(card);
+    });
+  }catch(e){lista.innerHTML='<div class="empty">Error al cargar evaluaciones.</div>';}
+}
+
+async function iniciarEval(evalId){
+  try{
+    const evals=await sb('cx_evaluaciones','GET',null,`?id=eq.${evalId}`);
+    if(!evals.length) return;
+    currentEval={...evals[0].data,id:evals[0].id};
+    evalAnswers={};
+    document.getElementById('agente-eval-lista').style.display='none';
+    document.getElementById('agente-eval-done').style.display='none';
+    document.getElementById('agente-eval-play').style.display='block';
+    document.getElementById('eval-play-titulo').textContent=currentEval.nombre;
+    document.getElementById('eval-play-sub').textContent=`${currentEval.questions.length} preguntas · Mínimo aprobatorio: ${currentEval.minimo}%`;
+    renderEvalPlay();
+  }catch(e){alert('Error al cargar la evaluación.');}
+}
+
+function cerrarEvalPlay(){
+  document.getElementById('agente-eval-play').style.display='none';
+  document.getElementById('agente-eval-lista').style.display='block';
+  renderAgenteEvalLista();
+}
+
+function volverEvalLista(){
+  document.getElementById('agente-eval-done').style.display='none';
+  document.getElementById('agente-eval-lista').style.display='block';
+  renderAgenteEvalLista();
+}
+
+async function verIntentosEval(evalId){
+  const lista=document.getElementById('agente-eval-lista');
+  try{
+    const [evals,resultados]=await Promise.all([
+      sb('cx_evaluaciones','GET',null,`?id=eq.${evalId}`),
+      sb('cx_eval_resultados','GET',null,`?eval_id=eq.${evalId}&user_id=eq.${currentUser.user_id}&order=created_at.desc`)
+    ]);
+    if(!evals.length||!resultados.length) return;
+    const ev=evals[0].data;
+    const letters=['A','B','C','D'];
+    const typeLabels={multiple:'Múltiple',tf:'V/F',escrita:'Escrita'};
+    const typeColors={multiple:'tag-multiple',tf:'tag-tf',escrita:'tag-escrita'};
+    const estadoTag={pendiente:'tag-muted',aprobado:'tag-success',rechazado:'tag-danger'};
+    const estadoLabel={pendiente:'Pendiente',aprobado:'Aprobado',rechazado:'Rechazado'};
+
+    let html=`<div class="detail-panel active" id="eval-intentos-panel">
+      <div class="detail-header">
+        <div>
+          <div style="font-size:15px;font-weight:600">${ev.nombre}</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">${resultados.length} intento${resultados.length!==1?'s':''} · Mínimo: ${ev.minimo}%</div>
+        </div>
+        <button class="btn btn-sm" onclick="document.getElementById('eval-intentos-panel').remove();document.getElementById('agente-eval-lista').style.display='block'">← Volver</button>
+      </div>`;
+
+    resultados.forEach((r,idx)=>{
+      let details=r.details;
+      if(typeof details==='string'){try{details=JSON.parse(details);}catch(e){details=null;}}
+      html+=`<div style="margin-bottom:1.5rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:600;font-size:14px">Intento ${resultados.length-idx} <span style="font-weight:400;color:var(--text-muted);font-size:13px">· ${r.fecha}</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="tag ${r.pct>=r.minimo?'tag-success':'tag-danger'}">${r.pct}%</span>
+            <span class="tag ${estadoTag[r.estado]||'tag-muted'}">${estadoLabel[r.estado]||r.estado}</span>
+          </div>
+        </div>`;
+      if(details&&details.length){
+        details.forEach((d,i)=>{
+          const q=ev.questions&&ev.questions[i];
+          let respuesta='',correcta='';
+          if(q){
+            if(q.type==='multiple'){respuesta=d.ans!==undefined&&d.ans!==''?q.options[parseInt(d.ans)]||d.ans:'Sin respuesta';correcta=q.options[parseInt(q.correct)]||q.correct;}
+            else{respuesta=d.ans||'Sin respuesta';correcta=q.correct;}
+          }
+          html+=`<div class="detail-q" style="margin-bottom:8px">
+            <div class="detail-q-header">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:12px;color:var(--text-muted);font-weight:500">Pregunta ${i+1}</span>
+                ${q?`<span class="tag ${typeColors[q.type]}" style="font-size:11px">${typeLabels[q.type]}</span>`:''}
+                ${q&&q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+              </div>
+              <span class="tag ${d.ok?'tag-success':'tag-danger'}" style="font-size:11px">${d.ok?'Correcta':'Incorrecta'}</span>
+            </div>
+            ${q?`<div style="font-size:13px;font-weight:500;margin-bottom:8px;line-height:1.5">${q.text}</div>`:''}
+            <div class="answer-row"><span class="answer-label">Respondiste:</span><span class="answer-val ${d.ok?'ok':'bad'}">${respuesta||d.ans||'Sin respuesta'}</span></div>
+            ${!d.ok&&correcta?`<div class="answer-row"><span class="answer-label">Correcta:</span><span class="answer-val ok">${correcta}</span></div>`:''}
+            ${q&&q.hint&&!d.ok?`<div class="hint-box" style="margin-top:6px"><strong>Por qué:</strong> ${q.hint}</div>`:''}
+          </div>`;
+        });
+      }
+      html+=`</div><hr style="border:none;border-top:1px solid var(--border);margin-bottom:1.5rem">`;
+    });
+    html+='</div>';
+    lista.style.display='none';
+    const tmp=document.createElement('div');tmp.innerHTML=html;
+    document.getElementById('agente-evaluaciones').insertBefore(tmp.firstChild,lista);
+  }catch(e){alert('Error al cargar los intentos.');}
+}
+
+function renderEvalPlay(){
+  const wrap=document.getElementById('eval-play-wrap');wrap.innerHTML='';
+  const letters=['A','B','C','D'];
+  currentEval.questions.forEach((q,i)=>{
+    const div=document.createElement('div');div.className='q-block fade-in';
+    let html=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;display:flex;justify-content:space-between">
+        <span>Pregunta ${i+1} de ${currentEval.questions.length}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${q.type==='multiple'?`<span style="font-size:11px;color:var(--text-muted);font-weight:500;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px">1 opción correcta</span>`:''}
+          ${q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+          <span class="tag ${q.type==='multiple'?'tag-multiple':q.type==='tf'?'tag-tf':'tag-escrita'}" style="font-size:11px">${q.type==='multiple'?'Múltiple':q.type==='tf'?'V/F':'Escrita'}</span>
+        </div>
+      </div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:14px;line-height:1.5">${q.text}</div>`;
+    if(q.type==='multiple'){
+      q.options.forEach((opt,j)=>{
+        html+=`<button class="opt-btn" id="eval-opt-${i}-${j}" onclick="selectEvalOpt(${i},${j})"><span class="opt-letter">${letters[j]}</span>${opt}</button>`;
+      });
+    }else if(q.type==='tf'){
+      ['Verdadero','Falso'].forEach((opt,j)=>{
+        html+=`<button class="opt-btn" id="eval-opt-${i}-${j}" onclick="selectEvalOpt(${i},${j})"><span class="opt-letter">${j===0?'V':'F'}</span>${opt}</button>`;
+      });
+    }else{
+      html+=`<label style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Escribí tu respuesta:</label>
+        <textarea class="written-input" id="eval-written-${i}" placeholder="Escribí acá..." oninput="evalAnswers[${i}]=this.value;updateEvalProg()"></textarea>`;
+    }
+    div.innerHTML=html;wrap.appendChild(div);
+  });
+  updateEvalProg();
+}
+
+function selectEvalOpt(qi,oi){
+  const q=currentEval.questions[qi];
+  evalAnswers[qi]=q.type==='tf'?(oi===0?'Verdadero':'Falso'):String(oi);
+  const total=q.type==='tf'?2:q.options.length;
+  for(let j=0;j<total;j++){const btn=document.getElementById(`eval-opt-${qi}-${j}`);if(btn)btn.classList.toggle('selected',j===oi);}
+  updateEvalProg();
+}
+
+function updateEvalProg(){
+  const t=currentEval.questions.length;let a=0;
+  currentEval.questions.forEach((q,i)=>{
+    if(q.type==='escrita'){const el=document.getElementById('eval-written-'+i);if(el&&el.value.trim())a++;}
+    else if(evalAnswers[i]!==undefined) a++;
+  });
+  document.getElementById('eval-prog-fill').style.width=Math.round((a/t)*100)+'%';
+}
+
+async function submitEval(){
+  const total=currentEval.questions.length;let unanswered=0;
+  currentEval.questions.forEach((q,i)=>{
+    if(q.type==='escrita'){const el=document.getElementById('eval-written-'+i);if(!el||!el.value.trim())unanswered++;else evalAnswers[i]=el.value.trim();}
+    else if(evalAnswers[i]===undefined) unanswered++;
+  });
+  if(unanswered>0&&!confirm(`Quedan ${unanswered} sin responder. ¿Enviás igual?`)) return;
+  let correct=0;
+  const details=currentEval.questions.map((q,i)=>{
+    const ans=evalAnswers[i]||'';let ok=false;
+    if(q.type==='multiple') ok=ans===q.correct;
+    else if(q.type==='tf') ok=ans===q.correct;
+    else ok=checkWritten(ans,q.correct);
+    if(ok) correct++;
+    return{ans,ok};
+  });
+  const pct=Math.round((correct/total)*100);
+  const aprueba=pct>=currentEval.minimo;
+  try{
+    await sb('cx_eval_resultados','POST',{
+      eval_id:currentEval.id,
+      eval_nombre:currentEval.nombre,
+      user_id:currentUser.user_id,
+      name:currentUser.name,
+      correct,total,pct,
+      minimo:currentEval.minimo,
+      fecha:new Date().toLocaleDateString('es-AR'),
+      estado:'pendiente',
+      details:JSON.stringify(details)
+    });
+  }catch(e){console.error('Error guardando resultado evaluación',e);}
+  document.getElementById('agente-eval-play').style.display='none';
+  document.getElementById('agente-eval-done').style.display='block';
+  document.getElementById('eval-done-score').textContent=pct+'%';
+  document.getElementById('eval-done-detail').textContent=`${correct} de ${total} correctas · ${currentEval.nombre}`;
+  document.getElementById('eval-done-status').innerHTML=aprueba
+    ?`<span class="tag tag-success" style="font-size:13px">✓ Alcanzaste el puntaje mínimo (${currentEval.minimo}%) — pendiente de aprobación del admin</span>`
+    :`<span class="tag tag-danger" style="font-size:13px">No alcanzaste el mínimo (${currentEval.minimo}%) — podés reintentar</span>`;
+  setTimeout(()=>{document.getElementById('eval-done-bar').style.width=pct+'%';},100);
+  // Review
+  const letters=['A','B','C','D'];const review=document.getElementById('eval-done-review');review.innerHTML='';
+  currentEval.questions.forEach((q,i)=>{
+    const d=details[i];const c=document.createElement('div');c.className='q-block fade-in';
+    let html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--text-muted)">Pregunta ${i+1}</span>
+        <span class="tag ${d.ok?'tag-success':'tag-danger'}" style="font-size:11px">${d.ok?'Correcta':'Incorrecta'}</span>
+        ${q.modulo?`<span class="tag tag-modulo" style="font-size:11px">${q.modulo}</span>`:''}
+      </div>
+      <div style="font-weight:500;margin-bottom:12px;line-height:1.5">${q.text}</div>`;
+    if(q.type==='multiple'){
+      q.options.forEach((opt,j)=>{
+        let cls='opt-btn';
+        if(j===parseInt(q.correct)) cls+=' correct';
+        else if(String(j)===d.ans&&!d.ok) cls+=' wrong';
+        html+=`<div class="${cls}"><span class="opt-letter">${letters[j]}</span>${opt}</div>`;
+      });
+    }else if(q.type==='tf'){
+      ['Verdadero','Falso'].forEach((opt,j)=>{
+        let cls='opt-btn';
+        if(opt===q.correct) cls+=' correct';
+        else if(opt===d.ans&&!d.ok) cls+=' wrong';
+        html+=`<div class="${cls}"><span class="opt-letter">${j===0?'V':'F'}</span>${opt}</div>`;
+      });
+    }else{
+      html+=`<div style="margin-bottom:8px"><label>Tu respuesta:</label>
+        <div class="written-input ${d.ok?'correct-written':'wrong-written'}" style="min-height:auto;padding:10px 12px">${d.ans||'Sin respuesta'}</div></div>
+        <div><label>Respuesta esperada:</label><div style="font-size:13px;color:var(--text-muted);padding:6px 0">${q.correct}</div></div>`;
+    }
+    if(q.hint&&!d.ok) html+=`<div class="hint-box"><strong>Por qué:</strong> ${q.hint}</div>`;
+    c.innerHTML=html;review.appendChild(c);
+  });
+}
+
+// ---- TABLERO ----
+let _tableroResults=[];
+let _tableroAgentes=[];
+
+async function initTablero(){
+  const wrap=document.getElementById('tablero-content');
+  wrap.innerHTML='<div class="empty">Cargando...</div>';
+  try{
+    const [results,users]=await Promise.all([
+      sb('cx_results','GET',null,'?select=*&order=created_at.asc'),
+      sb('cx_users','GET',null,'?role=eq.agente&select=name,user_id&order=name.asc')
+    ]);
+    _tableroResults=results;
+    _tableroAgentes=users;
+    // Poblar filtro de mes
+    const sel=document.getElementById('tablero-mes-sel');
+    const months=new Set();
+    results.forEach(r=>{
+      const parts=r.date?r.date.split('/'):[]; 
+      if(parts.length>=2){const m=parseInt(parts[1]);const y=parts[2]||new Date().getFullYear();months.add(`${y}-${String(m).padStart(2,'0')}`);}
+    });
+    const cur=sel.value;
+    sel.innerHTML='<option value="all">Todos los meses</option>';
+    [...months].sort().reverse().forEach(k=>{
+      const [y,m]=k.split('-');
+      const o=document.createElement('option');o.value=k;o.textContent=`${MONTH_NAMES[parseInt(m)-1]} ${y}`;sel.appendChild(o);
+    });
+    sel.value=cur||'all';
+    renderTablero();
+  }catch(e){wrap.innerHTML='<div class="empty">Error al cargar el tablero.</div>';}
+}
+
+function renderTablero(){
+  const wrap=document.getElementById('tablero-content');
+  const filtroMes=document.getElementById('tablero-mes-sel').value;
+  let results=_tableroResults;
+
+  // Filtrar por mes si corresponde
+  if(filtroMes!=='all'){
+    const [y,m]=filtroMes.split('-');
+    results=results.filter(r=>{
+      const parts=r.date?r.date.split('/'):[];
+      if(parts.length<2)return false;
+      return String(parseInt(parts[1])).padStart(2,'0')===m&&(parts[2]||String(new Date().getFullYear()))===y;
+    });
+  }
+
+  if(!results.length){wrap.innerHTML='<div class="empty">Sin resultados para este período.</div>';return;}
+
+  // Obtener quizzes únicos ordenados por fecha
+  const quizzesMap={};
+  results.forEach(r=>{if(!quizzesMap[r.week])quizzesMap[r.week]=r.date;});
+  const quizzes=Object.entries(quizzesMap).sort((a,b)=>a[1]>b[1]?1:-1).map(([week,date])=>({week,date}));
+
+  // Obtener agentes únicos de los resultados + lista de usuarios
+  const agentNamesFromResults=[...new Set(results.map(r=>r.name))].sort();
+  const agentNames=_tableroAgentes.length
+    ?[...new Set([..._tableroAgentes.map(a=>a.name),...agentNamesFromResults])].sort()
+    :agentNamesFromResults;
+
+  // Construir mapa: agente → semana → resultado
+  const matrix={};
+  agentNames.forEach(name=>{matrix[name]={};});
+  results.forEach(r=>{
+    if(!matrix[r.name])matrix[r.name]={};
+    // Si hay múltiples intentos para la misma semana, quedarse con el mejor
+    if(!matrix[r.name][r.week]||r.pct>matrix[r.name][r.week]){
+      matrix[r.name][r.week]=r.pct;
+    }
+  });
+
+  // Renderizar tabla
+  const APROBADO=80;
+  let html=`<table style="border-collapse:collapse;width:100%;font-size:13px;min-width:600px">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:10px 14px;background:var(--blue-darker);color:#fff;font-weight:600;border-radius:8px 0 0 0;white-space:nowrap;min-width:160px">CX Analyst</th>`;
+  quizzes.forEach(q=>{
+    html+=`<th style="text-align:center;padding:10px 10px;background:var(--blue-darker);color:#fff;font-weight:600;white-space:nowrap;font-size:12px">${q.date}<br><span style="font-weight:400;opacity:.7;font-size:11px">${q.week}</span></th>`;
+  });
+  html+=`<th style="text-align:center;padding:10px 14px;background:var(--blue-darker);color:#fff;font-weight:600;border-radius:0 8px 0 0;white-space:nowrap">Promedio</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  agentNames.forEach((name,idx)=>{
+    const row=matrix[name]||{};
+    const scores=quizzes.map(q=>row[q.week]!==undefined?row[q.week]:null);
+    const done=scores.filter(s=>s!==null);
+    const avg=done.length?Math.round(done.reduce((a,b)=>a+b,0)/done.length):null;
+    const bg=idx%2===0?'#fff':'#f8fbff';
+
+    html+=`<tr style="background:${bg}">
+      <td style="padding:10px 14px;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">${name}</td>`;
+
+    scores.forEach(s=>{
+      if(s===null){
+        html+=`<td style="text-align:center;padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:12px">—</td>`;
+      }else{
+        const ok=s>=APROBADO;
+        html+=`<td style="text-align:center;padding:10px;border-bottom:1px solid var(--border)">
+          <span style="display:inline-block;padding:4px 10px;border-radius:20px;font-weight:700;font-size:13px;background:${ok?'var(--success-bg)':'var(--danger-bg)'};color:${ok?'var(--success)':'var(--danger)'}">${s}%</span>
+        </td>`;
+      }
+    });
+
+    // Promedio
+    if(avg===null){
+      html+=`<td style="text-align:center;padding:10px;border-bottom:1px solid var(--border);color:var(--text-muted)">—</td>`;
+    }else{
+      const ok=avg>=APROBADO;
+      html+=`<td style="text-align:center;padding:10px;border-bottom:1px solid var(--border)">
+        <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-weight:700;font-size:13px;background:${ok?'var(--success-bg)':'var(--danger-bg)'};color:${ok?'var(--success)':'var(--danger)'}">${avg}%</span>
+      </td>`;
+    }
+    html+=`</tr>`;
+  });
+
+  // Fila de total general
+  const totals=quizzes.map(q=>{
+    const vals=agentNames.map(n=>matrix[n]&&matrix[n][q.week]!==undefined?matrix[n][q.week]:null).filter(v=>v!==null);
+    return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+  });
+  const totalAvg=totals.filter(t=>t!==null);
+  const grandAvg=totalAvg.length?Math.round(totalAvg.reduce((a,b)=>a+b,0)/totalAvg.length):null;
+
+  html+=`<tr style="background:var(--blue-darker)">
+    <td style="padding:10px 14px;font-weight:700;color:#fff">Total general</td>`;
+  totals.forEach(t=>{
+    if(t===null){html+=`<td style="text-align:center;padding:10px;color:rgba(255,255,255,.5)">—</td>`;}
+    else{
+      const ok=t>=APROBADO;
+      html+=`<td style="text-align:center;padding:10px">
+        <span style="display:inline-block;padding:4px 10px;border-radius:20px;font-weight:700;font-size:13px;background:${ok?'rgba(0,122,90,.3)':'rgba(192,57,43,.3)'};color:${ok?'#7FFFD4':'#FFB3B3'}">${t}%</span>
+      </td>`;
+    }
+  });
+  if(grandAvg!==null){
+    const ok=grandAvg>=APROBADO;
+    html+=`<td style="text-align:center;padding:10px">
+      <span style="display:inline-block;padding:4px 12px;border-radius:20px;font-weight:700;font-size:13px;background:${ok?'rgba(0,122,90,.3)':'rgba(192,57,43,.3)'};color:${ok?'#7FFFD4':'#FFB3B3'}">${grandAvg}%</span>
+    </td>`;
+  }else{html+=`<td></td>`;}
+  html+=`</tr></tbody></table>`;
+  wrap.innerHTML=html;
+}
+
+init();
+</script>
+</body>
+</html>
