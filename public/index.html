@@ -512,13 +512,12 @@ label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px;fon
 </div>
 
 <script>
-const SUPA_URL='https://pspukxfphvrxdfuyjhpj.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcHVreGZwaHZyeGRmdXlqaHBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODI5NTQsImV4cCI6MjA5MTI1ODk1NH0.1egA7BFul9NdSo1pFk6GlRC-Ruj8C-g-9uqM1PjFOIg';
+const API_URL='https://YOUR_APP.railway.app';
 
 async function sb(table,method='GET',body=null,query=''){
-  const res=await fetch(`${SUPA_URL}/rest/v1/${table}${query}`,{
+  const res=await fetch(`${API_URL}/rest/v1/${table}${query}`,{
     method,
-    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''},
+    headers:{'Content-Type':'application/json'},
     body:body?JSON.stringify(body):null
   });
   if(!res.ok){const e=await res.text();throw new Error(e);}
@@ -678,7 +677,7 @@ async function activateQuiz(){
       const users=await sb('cx_users','GET',null,'?role=eq.agente&select=name,email');
       const agents=users.filter(u=>u.email);
       if(agents.length){
-        await fetch('/api/notify',{
+        await fetch(`${API_URL}/api/notify`,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
@@ -787,7 +786,7 @@ async function enviarRecordatorio(btn){
   btn.innerHTML='<span class="spinner"></span> Enviando...';
   btn.disabled=true;
   try{
-    const res=await fetch('/api/reminder',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const res=await fetch(`${API_URL}/api/reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
     const data=await res.json();
     if(data.reminded===0) alert('✅ Todos los agentes ya completaron el quiz.');
     else alert(`⏰ Recordatorio enviado a ${data.reminded} agente${data.reminded!==1?'s':''} que aún no lo hicieron.`);
